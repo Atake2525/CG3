@@ -128,7 +128,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				texcoord.y = 1.0f - texcoord.y;
 				normal.x *= -1.0f;
 
-				triangle[faceVertex] = { position, texcoord, normal };
+				triangle[faceVertex] = {position, texcoord, normal};
 			}
 			// 頂点を逆順で登録することで、周り順を逆にする
 			modelData.vertices.push_back(triangle[2]);
@@ -702,32 +702,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
+	// 書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	// std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * kVertexCount); // 頂点データをリソースにコピー
 	// 経度分割1つ分の角度 φd
 	const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
 	// 緯度分割1つ分の角度 Θd
 	const float kLatEvery = float(M_PI) / float(kSubdivision);
 	// 緯度の方向に分割
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -float(M_PI) / 2.0f * kLatEvery * latIndex; // Θ
+		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex; // Θ
 		// 経度の方向に分割しながら線を描く
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery; // φ
 			// 頂点データを入力する。基準点a
-			if (vertexData != NULL) {
-				vertexData[start].position = {cos(lat) * cos(lon), sin(lat), cos(lat) * sin(lon), 1.0f};
+				vertexData[start].position = {cos(lat) * cos(lon),
+											  sin(lat),
+											  cos(lat) * sin(lon),
+											  1.0f};
 
-				vertexData[start].texcoord = {float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision)};
+				vertexData[start].texcoord = {float(lonIndex) / float(kSubdivision),
+											  1.0f - float(latIndex) / float(kSubdivision)};
 
 				// b
-				vertexData[start + 1].position = {cos(lat + kLatEvery) * cos(lon), sin(lat + kLatEvery), cos(lat + kLatEvery) * sin(lon), 1.0f};
+				vertexData[start + 1].position = {cos(lat + kLatEvery) * cos(lon),
+												  sin(lat + kLatEvery), 
+												  cos(lat + kLatEvery) * sin(lon),
+												  1.0f};
 
-				vertexData[start + 1].texcoord = {float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision)};
+				vertexData[start + 1].texcoord = {float(lonIndex) / float(kSubdivision),
+												  1.0f - float(latIndex + 1) / float(kSubdivision)};
 
 				// c
-				vertexData[start + 2].position = {cos(lat) * cos(lon + kLonEvery), sin(lat), cos(lat) * sin(lon + kLonEvery)};
+				vertexData[start + 2].position = {cos(lat) * cos(lon + kLonEvery), 
+												  sin(lat), 
+												  cos(lat) * sin(lon + kLonEvery),
+												  1.0f};
 
-				vertexData[start + 2].texcoord = {float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision)};
+				vertexData[start + 2].texcoord = {float(lonIndex + 1) / float(kSubdivision),
+												  1.0f - float(latIndex) / float(kSubdivision)};
 
 				// c
 				vertexData[start + 3] = vertexData[start + 2];
@@ -736,9 +750,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				vertexData[start + 4] = vertexData[start + 1];
 
 				// d
-				vertexData[start + 5].position = {cos(lat + kLatEvery) * cos(lon + kLonEvery), sin(lat + kLatEvery), cos(lat + kLatEvery) * sin(lon + kLonEvery), 1.0f};
-				vertexData[start + 5].texcoord = {float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / kSubdivision};
-			}
+				vertexData[start + 5].position = {cos(lat + kLatEvery) * cos(lon + kLonEvery),
+												  sin(lat + kLatEvery),
+												  cos(lat + kLatEvery) * sin(lon + kLonEvery),
+												  1.0f};
+				vertexData[start + 5].texcoord = {float(lonIndex + 1) / float(kSubdivision),
+												  1.0f - float(latIndex + 1) / kSubdivision};
 		}
 	}
 
@@ -761,11 +778,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		////// 左下
 		//vertexData[5].position = {-0.5f, -0.5f, 0.0f, 1.0f};
 		//vertexData[5].texcoord = {0.0f, 1.0f};
-
-
-	// 書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * kVertexCount); // 頂点データをリソースにコピー
 
 
 
@@ -1283,7 +1295,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// TransformationMatrixCBbufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			// 描画
-			commandList->DrawInstanced(6, 1, 0, 0);
+			//commandList->DrawInstanced(6, 1, 0, 0);
 
 			 
 			// 実際のcommandListのImGuiの描画コマンドを積む
