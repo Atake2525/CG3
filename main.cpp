@@ -12,6 +12,7 @@
 #include "Vector4.h"
 #include "Matrix4x4.h"
 #include "kMath.h"
+#include "wrl.h"
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
@@ -684,19 +685,55 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 	// 分割数
-	const uint32_t kSubdivision = 16;
-	const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
+	//const uint32_t kSubdivision = 16;
+	//const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
 	// モデル読み込み
 	//ModelData modelData = LoadObjFile("Resources", "axis.obj");
-	//DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
+	// Particle
+	ModelData modelData;
+	modelData.vertices.push_back({
+	    .position = {1.0f, 1.0f, 0.0f, 1.0f},
+          .texcoord = {0.0f, 0.0f},
+          .normal = {0.0f, 0.0f, 1.0f}
+    }); // 左上
+	modelData.vertices.push_back({
+	    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
+          .texcoord = {1.0f, 0.0f},
+          .normal = {0.0f, 0.0f, 1.0f}
+    }); // 右上
+	modelData.vertices.push_back({
+	    .position = {1.0f, -1.0f, 0.0f, 1.0f},
+          .texcoord = {0.0f, 1.0f},
+          .normal = {0.0f, 0.0f, 1.0f}
+    }); // 左下
+	modelData.vertices.push_back({
+	    .position = {1.0f, -1.0f, 0.0f, 1.0f},
+          .texcoord = {0.0f, 1.0f},
+          .normal = {0.0f, 0.0f, 1.0f}
+    }); // 左下
+	modelData.vertices.push_back({
+	    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
+          .texcoord = {1.0f, 0.0f},
+          .normal = {0.0f, 0.0f, 1.0f}
+    }); // 右上
+	modelData.vertices.push_back({
+	    .position = {-1.0f, -1.0f, 0.0f, 1.0f},
+          .texcoord = {1.0f, 1.0f},
+          .normal = {0.0f, 0.0f, 1.0f}
+    }); // 右下
+	modelData.material.textureFilePath = "./Resources/uvChecker.png";
+	DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
+	const uint32_t kNumInstance = 10;
 	// 実際に頂点リソースを作る
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kVertexCount);
+	//ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kVertexCount);
+	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(transfomationmatrix));
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	// リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
 	// 使用するリソースのサイズは頂点3つ分のサイズ
-	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * kVertexCount);
+	//vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * kVertexCount);
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
 	// 1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData); // 1頂点当たりのサイズ
 
@@ -704,60 +741,60 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexData* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	// std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * kVertexCount); // 頂点データをリソースにコピー
-	// 経度分割1つ分の角度 φd
-	const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
-	// 緯度分割1つ分の角度 Θd
-	const float kLatEvery = float(M_PI) / float(kSubdivision);
-	// 緯度の方向に分割
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex; // Θ
-		// 経度の方向に分割しながら線を描く
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery; // φ
-			// 頂点データを入力する。基準点a
-				vertexData[start].position = {cos(lat) * cos(lon),
-											  sin(lat),
-											  cos(lat) * sin(lon),
-											  1.0f};
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
+	//// 経度分割1つ分の角度 φd
+	//const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
+	//// 緯度分割1つ分の角度 Θd
+	//const float kLatEvery = float(M_PI) / float(kSubdivision);
+	//// 緯度の方向に分割
+	//for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+	//	float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex; // Θ
+	//	// 経度の方向に分割しながら線を描く
+	//	for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+	//		uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+	//		float lon = lonIndex * kLonEvery; // φ
+	//		// 頂点データを入力する。基準点a
+	//			vertexData[start].position = {cos(lat) * cos(lon),
+	//										  sin(lat),
+	//										  cos(lat) * sin(lon),
+	//										  1.0f};
 
-				vertexData[start].texcoord = {float(lonIndex) / float(kSubdivision),
-											  1.0f - float(latIndex) / float(kSubdivision)};
+	//			vertexData[start].texcoord = {float(lonIndex) / float(kSubdivision),
+	//										  1.0f - float(latIndex) / float(kSubdivision)};
 
-				// b
-				vertexData[start + 1].position = {cos(lat + kLatEvery) * cos(lon),
-												  sin(lat + kLatEvery), 
-												  cos(lat + kLatEvery) * sin(lon),
-												  1.0f};
+	//			// b
+	//			vertexData[start + 1].position = {cos(lat + kLatEvery) * cos(lon),
+	//											  sin(lat + kLatEvery), 
+	//											  cos(lat + kLatEvery) * sin(lon),
+	//											  1.0f};
 
-				vertexData[start + 1].texcoord = {float(lonIndex) / float(kSubdivision),
-												  1.0f - float(latIndex + 1) / float(kSubdivision)};
+	//			vertexData[start + 1].texcoord = {float(lonIndex) / float(kSubdivision),
+	//											  1.0f - float(latIndex + 1) / float(kSubdivision)};
 
-				// c
-				vertexData[start + 2].position = {cos(lat) * cos(lon + kLonEvery), 
-												  sin(lat), 
-												  cos(lat) * sin(lon + kLonEvery),
-												  1.0f};
+	//			// c
+	//			vertexData[start + 2].position = {cos(lat) * cos(lon + kLonEvery), 
+	//											  sin(lat), 
+	//											  cos(lat) * sin(lon + kLonEvery),
+	//											  1.0f};
 
-				vertexData[start + 2].texcoord = {float(lonIndex + 1) / float(kSubdivision),
-												  1.0f - float(latIndex) / float(kSubdivision)};
+	//			vertexData[start + 2].texcoord = {float(lonIndex + 1) / float(kSubdivision),
+	//											  1.0f - float(latIndex) / float(kSubdivision)};
 
-				// c
-				vertexData[start + 3] = vertexData[start + 2];
+	//			// c
+	//			vertexData[start + 3] = vertexData[start + 2];
 
-				// b
-				vertexData[start + 4] = vertexData[start + 1];
+	//			// b
+	//			vertexData[start + 4] = vertexData[start + 1];
 
-				// d
-				vertexData[start + 5].position = {cos(lat + kLatEvery) * cos(lon + kLonEvery),
-												  sin(lat + kLatEvery),
-												  cos(lat + kLatEvery) * sin(lon + kLonEvery),
-												  1.0f};
-				vertexData[start + 5].texcoord = {float(lonIndex + 1) / float(kSubdivision),
-												  1.0f - float(latIndex + 1) / kSubdivision};
-		}
-	}
+	//			// d
+	//			vertexData[start + 5].position = {cos(lat + kLatEvery) * cos(lon + kLonEvery),
+	//											  sin(lat + kLatEvery),
+	//											  cos(lat + kLatEvery) * sin(lon + kLonEvery),
+	//											  1.0f};
+	//			vertexData[start + 5].texcoord = {float(lonIndex + 1) / float(kSubdivision),
+	//											  1.0f - float(latIndex + 1) / kSubdivision};
+	//	}
+	//}
 
 		//// 左上
 		//vertexData[0].position = {-0.5f, 0.5f, 0.0f, 1.0f};
@@ -792,6 +829,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 
+	// DescriptorRange
+	D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0; // 0 から始まる
+	descriptorRangeForInstancing[0].NumDescriptors = 1; // 数は1つ
+	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
+	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;  // バイナリフィルタ
@@ -816,9 +860,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;     // CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;  // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                     // レジスタ番号0とバインド
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 0;                    // レジスタ番号0を使う
+	//rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
+	//rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShaderで使う
+	//rootParameters[1].Descriptor.ShaderRegister = 0;                    // レジスタ番号0を使う
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う                                                                // DescriptorTableを使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;          // VertexShaderで使う
+	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing; // Tableの中身の配列を指定
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing); // Tableで利用する数
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;            // Tableの中身の配列を指定
@@ -902,6 +950,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(vertexShaderBlob != nullptr);
 	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(pixelShaderBlob != nullptr);
+	// Shaderをコンパイルする
+	IDxcBlob* vertexShaderParticleBlob = CompileShader(L"Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	assert(vertexShaderParticleBlob != nullptr);
+	IDxcBlob* pixelShaderParticleBlob = CompileShader(L"Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	assert(pixelShaderParticleBlob != nullptr);
 	// PSOを作成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature; // RootSignature
@@ -970,9 +1023,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// CPUで動かすようのTransformを作る
 	Transform transformSprite{ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f ,0.0f} };
 
-	
-
-	
 	/*// 頂点リソースを作る
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
 	// 頂点バッファービューを作成する
@@ -1259,8 +1309,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			*wvpData = worldViewProjectionMatrix;
 
 
-
-
 			// 描画用のDescriptorHeapの設定
 			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps);
@@ -1286,7 +1334,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ModelData描画
 			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 			// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
-			commandList->DrawInstanced(kVertexCount, 1, 0, 0);
+			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
+
+			for (size_t i = 0; i < modelData.vertices.size(); i++) {
+				commandList->SetGraphicsRootConstantBufferView(1, vertexResource->GetGPUVirtualAddress());
+				commandList->DrawInstanced(modelData.vertices.size(), i, 0, 0);
+			}
 
 			//Spriteの描画。変更が必要なものだけ変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
