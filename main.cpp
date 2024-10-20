@@ -691,42 +691,70 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ModelData modelData = LoadObjFile("Resources", "axis.obj");
 	// Particle
 	ModelData modelData;
-	modelData.vertices.push_back({
-	    .position = {1.0f, 1.0f, 0.0f, 1.0f},
-          .texcoord = {0.0f, 0.0f},
-          .normal = {0.0f, 0.0f, 1.0f}
-    }); // 左上
-	modelData.vertices.push_back({
-	    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
-          .texcoord = {1.0f, 0.0f},
-          .normal = {0.0f, 0.0f, 1.0f}
-    }); // 右上
-	modelData.vertices.push_back({
-	    .position = {1.0f, -1.0f, 0.0f, 1.0f},
-          .texcoord = {0.0f, 1.0f},
-          .normal = {0.0f, 0.0f, 1.0f}
-    }); // 左下
-	modelData.vertices.push_back({
-	    .position = {1.0f, -1.0f, 0.0f, 1.0f},
-          .texcoord = {0.0f, 1.0f},
-          .normal = {0.0f, 0.0f, 1.0f}
-    }); // 左下
-	modelData.vertices.push_back({
-	    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
-          .texcoord = {1.0f, 0.0f},
-          .normal = {0.0f, 0.0f, 1.0f}
-    }); // 右上
-	modelData.vertices.push_back({
-	    .position = {-1.0f, -1.0f, 0.0f, 1.0f},
-          .texcoord = {1.0f, 1.0f},
-          .normal = {0.0f, 0.0f, 1.0f}
-    }); // 右下
+	//modelData.vertices.push_back({
+	//    .position = {1.0f, 1.0f, 0.0f, 1.0f},
+ //         .texcoord = {0.0f, 0.0f},
+ //         .normal = {0.0f, 0.0f, 1.0f}
+ //   }); // 左上
+	//modelData.vertices.push_back({
+	//    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
+ //         .texcoord = {1.0f, 0.0f},
+ //         .normal = {0.0f, 0.0f, 1.0f}
+ //   }); // 右上
+	//modelData.vertices.push_back({
+	//    .position = {1.0f, -1.0f, 0.0f, 1.0f},
+ //         .texcoord = {0.0f, 1.0f},
+ //         .normal = {0.0f, 0.0f, 1.0f}
+ //   }); // 左下
+	//modelData.vertices.push_back({
+	//    .position = {1.0f, -1.0f, 0.0f, 1.0f},
+ //         .texcoord = {0.0f, 1.0f},
+ //         .normal = {0.0f, 0.0f, 1.0f}
+ //   }); // 左下
+	//modelData.vertices.push_back({
+	//    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
+ //         .texcoord = {1.0f, 0.0f},
+ //         .normal = {0.0f, 0.0f, 1.0f}
+ //   }); // 右上
+	//modelData.vertices.push_back({
+	//    .position = {-1.0f, -1.0f, 0.0f, 1.0f},
+ //         .texcoord = {1.0f, 1.0f},
+ //         .normal = {0.0f, 0.0f, 1.0f}
+ //   }); // 右下
 	modelData.material.textureFilePath = "./Resources/uvChecker.png";
 	DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
 	const uint32_t kNumInstance = 10;
 	// 実際に頂点リソースを作る
 	//ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kVertexCount);
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(transfomationmatrix));
+	// 書き込むためのアドレスを取得
+	TransfomationMatrix* instancingData = nullptr;
+	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
+	// 単位行列を書き込んでおく
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		instancingData[index].WVP = MakeIdentity4x4();
+		instancingData[index].World = MakeIdentity4x4();
+	}
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	instancingSrvDesc.Buffer.FirstElement = 0;
+	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	instancingSrvDesc.Buffer.NumElements = kNumInstance;
+	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
+
+	Transform transforms[kNumInstance];
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		transforms[index].scale = {1.0f, 1.0f, 1.0f};
+		transforms[index].rotate = {0.0f, 0.0f, 0.0f};
+		transforms[index].translate = {index * 0.1f, index * 0.1f, index * 0.1f};
+	}
+
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	// リソースの先頭のアドレスから使う
@@ -1248,6 +1276,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
 
+			for (uint32_t index = 0; index < kNumInstance; ++index) {
+				Matrix4x4 worldMatrix = MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
+				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+				instancingData[index].WVP = worldViewProjectionMatrix;
+				instancingData[index].World = worldMatrix;
+			}
+
 			// 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に書き換える
 			//ImGui::ShowDemoWindow();
 
@@ -1335,11 +1370,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 			// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
 			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
-
-			for (size_t i = 0; i < modelData.vertices.size(); i++) {
-				commandList->SetGraphicsRootConstantBufferView(1, vertexResource->GetGPUVirtualAddress());
-				commandList->DrawInstanced(modelData.vertices.size(), i, 0, 0);
-			}
+			// instancing用のDataを読むためにStructBufferのSRVを設定する
+			commandList->SetGraphicsRootConstantBufferView(1, vertexResource->GetGPUVirtualAddress());
+			// 描画
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
 
 			//Spriteの描画。変更が必要なものだけ変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
