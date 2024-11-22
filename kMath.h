@@ -29,6 +29,18 @@ struct VertexData
 	Vector3 normal;
 };
 
+struct TransformationMatrix {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+};
+
+struct DerectionalLight {
+	Vector4 color;     //!< ライトの色
+	Vector3 direction; //!< ライトの向き
+	float intensity;      //!< 輝度
+};
+
+
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4();
 
