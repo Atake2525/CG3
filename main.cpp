@@ -771,7 +771,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transforms[kNumInstance];
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		transforms[index].scale = {1.0f, 1.0f, 1.0f};
+		transforms[index].scale = {0.5f, 0.5f, 0.5f};
 		transforms[index].rotate = {0.0f, 3.14f, 0.0f};
 		transforms[index].translate = {index * 0.1f, index * 0.1f, index * 0.1f};
 	}
