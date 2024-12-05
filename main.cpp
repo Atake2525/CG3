@@ -706,12 +706,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 	// 分割数
-	//const uint32_t kSubdivision = 16;
-	//const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
+	const uint32_t kSubdivision = 16;
+	const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
 	// モデル読み込み
-	//ModelData modelData = LoadObjFile("Resources", "axis.obj");
+	ModelData modelData = LoadObjFile("Resources", "axis.obj");
 	// Particle
-	ModelData modelData;
+	//ModelData modelData;
 	//modelData.vertices.push_back({
 	//    .position = {1.0f, 1.0f, 0.0f, 1.0f},
  //         .texcoord = {0.0f, 0.0f},
@@ -747,7 +747,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const uint32_t kNumInstance = 10;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(TransformationMatrix) * kNumInstance);
 	// 実際に頂点リソースを作る
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kNumInstance);
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(TransformationMatrix) * modelData.vertices.size());
 	// 書き込むためのアドレスを取得
 	TransformationMatrix* instancingData = nullptr;
 	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
@@ -782,15 +782,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
 	// 使用するリソースのサイズは頂点3つ分のサイズ
 	//vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * kVertexCount);
-	vertexBufferView.SizeInBytes = UINT(sizeof(TransformationMatrix) * kNumInstance);
+	vertexBufferView.SizeInBytes = UINT(sizeof(TransformationMatrix) * modelData.vertices.size());
 	// 1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(TransformationMatrix); // 1頂点当たりのサイズ
 
 	// 頂点リソースにデータを書き込む
-	//VertexData* vertexData = nullptr;
+	VertexData* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
 	//// 経度分割1つ分の角度 φd
 	//const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
 	//// 緯度分割1つ分の角度 Θd
