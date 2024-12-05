@@ -709,7 +709,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const uint32_t kSubdivision = 16;
 	const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
 	// モデル読み込み
-	ModelData modelData = LoadObjFile("Resources", "axis.obj");
+	ModelData modelData = LoadObjFile("Resources", "plane.obj");
 	// Particle
 	//ModelData modelData;
 	//modelData.vertices.push_back({
@@ -747,7 +747,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const uint32_t kNumInstance = 10;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(TransformationMatrix) * kNumInstance);
 	// 実際に頂点リソースを作る
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(TransformationMatrix) * modelData.vertices.size());
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 	// 書き込むためのアドレスを取得
 	TransformationMatrix* instancingData = nullptr;
 	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
@@ -772,7 +772,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transforms[kNumInstance];
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
 		transforms[index].scale = {1.0f, 1.0f, 1.0f};
-		transforms[index].rotate = {0.0f, 0.0f, 0.0f};
+		transforms[index].rotate = {0.0f, 3.14f, 0.0f};
 		transforms[index].translate = {index * 0.1f, index * 0.1f, index * 0.1f};
 	}
 
@@ -782,9 +782,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
 	// 使用するリソースのサイズは頂点3つ分のサイズ
 	//vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * kVertexCount);
-	vertexBufferView.SizeInBytes = UINT(sizeof(TransformationMatrix) * modelData.vertices.size());
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
 	// 1頂点当たりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(TransformationMatrix); // 1頂点当たりのサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData); // 1頂点当たりのサイズ
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
