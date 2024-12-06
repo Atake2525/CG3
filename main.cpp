@@ -1,4 +1,4 @@
-﻿#include <Windows.h>
+#include <Windows.h>
 #include <cstdint>
 #include <string>
 #include <format>
@@ -790,7 +790,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexData* vertexData = nullptr;
 	// 書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
+
 	//// 経度分割1つ分の角度 φd
 	//const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
 	//// 緯度分割1つ分の角度 Θd
@@ -1494,7 +1495,3 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	CoUninitialize();
 	return 0;
 }
-
-
-
-
