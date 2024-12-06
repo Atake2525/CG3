@@ -773,7 +773,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
 		transforms[index].scale = {0.5f, 0.5f, 0.5f};
 		transforms[index].rotate = {0.0f, 3.14f, 0.0f};
-		transforms[index].translate = {index * 0.1f, index * 0.1f, index * 0.1f};
+		transforms[index].translate = {index * 0.1f, index * -0.1f, index * 0.1f};
 	}
 
 	// 頂点バッファビューを作成する
