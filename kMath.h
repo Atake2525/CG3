@@ -15,11 +15,20 @@
 	float radius;   //!< 半径
 };*/
 
+
 struct Transform
 {
 	Vector3 scale;
 	Vector3 rotate;
 	Vector3 translate;
+};
+
+struct Particle {
+	Transform transform;
+	Vector3 velocity;
+	Vector4 color;
+	float lifeTime;
+	float currentTime;
 };
 
 struct VertexData
@@ -28,6 +37,10 @@ struct VertexData
 	Vector2 texcoord;
 	Vector3 normal;
 };
+
+const Vector3 operator*(const Vector3& v, const float f);
+
+Vector3& operator+=(Vector3& v1, const Vector3& v2);
 
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4();
