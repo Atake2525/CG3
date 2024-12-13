@@ -13,6 +13,7 @@
 #include "Matrix4x4.h"
 #include "kMath.h"
 #include <wrl.h>
+#include <numbers>
 #include <random>
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
@@ -1200,7 +1201,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Transform変数を作る
 	Transform transform{ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
-	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,-5.0f} };
+	// CG3_01_02にてbillboardの確認のためにrotateとtranslateを変更
+	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, {std::numbers::pi_v<float> / 3.0f, std::numbers::pi_v<float>, 0.0f}, {0.0f, 23.0f, 10.0f} };
 
 	Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 
@@ -1226,6 +1228,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 2;
 	indexDataSprite[3] = 1;  indexDataSprite[4] = 3;  indexDataSprite[5] = 2;
 		
+	bool useBillboard = false;
+	bool start = false;
+
 	//ゲームループ
 	MSG msg{};
 	//ウィンドウの×ボタンが押されるまでループ
@@ -1317,6 +1322,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						instancingData[index].color = particles[index].color;
 					}
 				}
+				ImGui::Checkbox("billboard", &useBillboard);
+				ImGui::Checkbox("start", &start);
 				ImGui::TreePop();
 			}
 
@@ -1342,9 +1349,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 				// ...WorldMatrixを求めたり
 				float alpha = 1.0f - (particles[index].currentTime / particles[index].lifeTime);
-				particles[index].transform.translate += particles[index].velocity * kDeltaTime;
-				particles[index].currentTime += kDeltaTime;
-				Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+				particles[index].transform.translate = particles[index].transform.translate;
+				particles[index].currentTime = particles[index].currentTime;
+				if (start) {
+					// ...WorldMatrixを求めたり
+					float alpha = 1.0f - (particles[index].currentTime / particles[index].lifeTime);
+					particles[index].transform.translate += particles[index].velocity * kDeltaTime;
+					particles[index].currentTime += kDeltaTime;
+				}
+				// CG3_01_02
+				Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+				Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
+				billboardMatrix.m[3][0] = 0.0f;
+				billboardMatrix.m[3][1] = 0.0f;
+				billboardMatrix.m[3][2] = 0.0f;
+				if (!useBillboard) {
+					billboardMatrix = MakeIdentity4x4();
+				}
+				Matrix4x4 scaleMatrix = MakeScaleMatrix(particles[index].transform.scale);
+				Matrix4x4 translateMatrix = MakeTranslateMatrix(particles[index].transform.translate);
+				Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
+				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 				instancingData[index].WVP = worldViewProjectionMatrix;
 				instancingData[index].World = worldMatrix;
