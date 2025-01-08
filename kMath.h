@@ -38,9 +38,18 @@ struct VertexData
 	Vector3 normal;
 };
 
+struct Emitter {
+	Transform transform; //!< エミッタのTransform
+	uint32_t count; //!< 発生数
+	float frequency; //!< 発生頻度
+	float frequencyTime; //!< 頻度用時刻
+};
+
 const Vector3 operator*(const Vector3& v, const float f);
 
 Vector3& operator+=(Vector3& v1, const Vector3& v2);
+
+Vector3 operator+(Vector3 v1, const Vector3& v2);
 
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4();
