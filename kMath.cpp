@@ -15,6 +15,15 @@ Vector3& operator+=(Vector3& v1, const Vector3& v2) {
 	return v1;
 }
 
+Vector3 operator+(Vector3 v1, const Vector3& v2) {
+	Vector3 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
+
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4() {
 	Matrix4x4 ans = { 0 };
