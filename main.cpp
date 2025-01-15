@@ -774,13 +774,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexResourceSircle->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSircle));
 
 	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewCircle{};
 	// リソースの先頭のアドレスから使う
-	vertexBufferViewSprite.BufferLocation = VertexResourceSircle->GetGPUVirtualAddress();
+	vertexBufferViewCircle.BufferLocation = VertexResourceSircle->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferViewCircle.SizeInBytes = sizeof(VertexData) * 6;
 	// 1頂点あたりのサイズ
-	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+	vertexBufferViewCircle.StrideInBytes = sizeof(VertexData);
 
 	// 経度分割1つ分の角度 φd
 	 const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
@@ -873,71 +873,65 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
  //         .texcoord = {1.0f, 1.0f},
  //         .normal = {0.0f, 0.0f, 1.0f}
  //   }); // 右下
-	modelData.material.textureFilePath = "./Resources/circle.png";
-	DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
-	const uint32_t kNumMaxInstance = 100;
-	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumMaxInstance);
-	// 実際に頂点リソースを作る
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
-	// 書き込むためのアドレスを取得
-	ParticleForGPU* instancingData = nullptr;
-	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
-	// 単位行列を書き込んでおく
-	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		instancingData[index].WVP = MakeIdentity4x4();
-		instancingData[index].World = MakeIdentity4x4();
-	}
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
-	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	instancingSrvDesc.Buffer.FirstElement = 0;
-	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
-	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
-	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
-	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
-	device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumInstance);
-
-	std::list<Particle> particles;
-	Emitter emitter{};
-	emitter.count = 3;
-	emitter.frequency = 0.5f;
-	emitter.frequencyTime = 0.0f;
-
-	bool isAccelerationField = false;
-	AccelerationField accelerationField;
-	accelerationField.acceleration = {15.0f, 0.0f, 0.0f};
-	accelerationField.area.min = {-1.0f, -1.0f, -1.0f};
-	accelerationField.area.max = {1.0f, 1.0f, 1.0f};
-
+	//modelData.material.textureFilePath = "./Resources/circle.png";
+	//DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
+	//const uint32_t kNumMaxInstance = 100;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumMaxInstance);
+	//// 実際に頂点リソースを作る
+	//ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
+	//// 書き込むためのアドレスを取得
+	//ParticleForGPU* instancingData = nullptr;
+	//instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
+	//// 単位行列を書き込んでおく
 	//for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-	//	particles[index] = MakeNewParticle(randomEngine);
-	//	//instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	//	instancingData[index].color = particles[index].color;
+	//	instancingData[index].WVP = MakeIdentity4x4();
+	//	instancingData[index].World = MakeIdentity4x4();
 	//}
 
-	// △tを定義。とりあえず60fps固定してあるが、実時間を計算して可変fpsで動かせるようにしておくとなお良い
-	const float kDeltaTime = 1.0f / 60.0f;
+	//D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+	//instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	//instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	//instancingSrvDesc.Buffer.FirstElement = 0;
+	//instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	//instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
+	//instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+	//D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	//D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	//device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
 
-	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	// リソースの先頭のアドレスから使う
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
-	// 使用するリソースのサイズは頂点3つ分のサイズ
-	//vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * kVertexCount);
-	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
-	// 1頂点当たりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(VertexData); // 1頂点当たりのサイズ
+	////Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumInstance);
 
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexData = nullptr;
-	// 書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
+	//std::list<Particle> particles;
+	//Emitter emitter{};
+	//emitter.count = 3;
+	//emitter.frequency = 0.5f;
+	//emitter.frequencyTime = 0.0f;
+
+	//bool isAccelerationField = false;
+	//AccelerationField accelerationField;
+	//accelerationField.acceleration = {15.0f, 0.0f, 0.0f};
+	//accelerationField.area.min = {-1.0f, -1.0f, -1.0f};
+	//accelerationField.area.max = {1.0f, 1.0f, 1.0f};
+
+	//// △tを定義。とりあえず60fps固定してあるが、実時間を計算して可変fpsで動かせるようにしておくとなお良い
+	//const float kDeltaTime = 1.0f / 60.0f;
+
+	//// 頂点バッファビューを作成する
+	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	//// リソースの先頭のアドレスから使う
+	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress(); // リソースの先頭のアドレスから使う
+	//// 使用するリソースのサイズは頂点3つ分のサイズ
+	////vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * kVertexCount);
+	//vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+	//// 1頂点当たりのサイズ
+	//vertexBufferView.StrideInBytes = sizeof(VertexData); // 1頂点当たりのサイズ
+
+	//// 頂点リソースにデータを書き込む
+	//VertexData* vertexData = nullptr;
+	//// 書き込むためのアドレスを取得
+	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	//std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
 
 
 
@@ -1074,15 +1068,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	/*IDxcBlob* vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	IDxcBlob* vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(vertexShaderBlob != nullptr);
 	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob != nullptr);*/
+	assert(pixelShaderBlob != nullptr);
 	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = CompileShader(L"Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	/*IDxcBlob* vertexShaderBlob = CompileShader(L"Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(vertexShaderBlob != nullptr);
 	IDxcBlob* pixelShaderBlob = CompileShader(L"Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob != nullptr);
+	assert(pixelShaderBlob != nullptr);*/
 	// PSOを作成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature; // RootSignature
@@ -1370,7 +1364,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 				ImGui::TreePop();
 			}
-			if (ImGui::TreeNode("ParticleSTR")) {
+			/*if (ImGui::TreeNode("ParticleSTR")) {
 				if (ImGui::Button("Add Particle")) {
 					particles.splice(particles.end(), Emit(emitter, randomEngine));
 				}
@@ -1379,7 +1373,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::Checkbox("accelerationField", &isAccelerationField);
 				ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
 				ImGui::TreePop();
-			}
+			}*/
 
 
 			ImGui::End();
@@ -1395,60 +1389,60 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
 
-			if (start) {
-				emitter.frequencyTime += kDeltaTime;
-				if (emitter.frequency <= emitter.frequencyTime) {
-					particles.splice(particles.end(), Emit(emitter, randomEngine));
-					emitter.frequencyTime -= emitter.frequency;
-				}
-			}
+			//if (start) {
+			//	emitter.frequencyTime += kDeltaTime;
+			//	if (emitter.frequency <= emitter.frequencyTime) {
+			//		particles.splice(particles.end(), Emit(emitter, randomEngine));
+			//		emitter.frequencyTime -= emitter.frequency;
+			//	}
+			//}
 
-			uint32_t numInstance = 0; // 描画すべきインスタンス
+			//uint32_t numInstance = 0; // 描画すべきインスタンス
 
-			for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end();) {
-				if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
-					particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
-					continue;
-				}
-				// Fieldの範囲内のParticleには加速度を適用する
-				if (isAccelerationField) {
-					if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
-						(*particleIterator).velocity += accelerationField.acceleration * kDeltaTime;
-					}
-				}
-				//(*particleIterator).currentTime = (*particleIterator).currentTime;
-				(*particleIterator).currentTime += kDeltaTime;
-				float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-				(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
-				if (start) {
-					// ...WorldMatrixを求めたり
-					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-					(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
-					(*particleIterator).currentTime += kDeltaTime;
-				}
-				// CG3_01_02
-				Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
-				Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
-				billboardMatrix.m[3][0] = 0.0f;
-				billboardMatrix.m[3][1] = 0.0f;
-				billboardMatrix.m[3][2] = 0.0f;
-				if (!useBillboard) {
-					billboardMatrix = MakeIdentity4x4();
-				}
-				Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
-				Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
-				Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
-				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
-				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
-				if (numInstance < kNumMaxInstance) {
-					instancingData[numInstance].WVP = worldViewProjectionMatrix;
-					instancingData[numInstance].World = worldMatrix;
-					instancingData[numInstance].color = (*particleIterator).color;
-					instancingData[numInstance].color.w = alpha;
-					++numInstance;
-				}
-				++particleIterator;
-			}
+			//for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end();) {
+			//	if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			//		particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
+			//		continue;
+			//	}
+			//	// Fieldの範囲内のParticleには加速度を適用する
+			//	if (isAccelerationField) {
+			//		if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
+			//			(*particleIterator).velocity += accelerationField.acceleration * kDeltaTime;
+			//		}
+			//	}
+			//	//(*particleIterator).currentTime = (*particleIterator).currentTime;
+			//	(*particleIterator).currentTime += kDeltaTime;
+			//	float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+			//	(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+			//	if (start) {
+			//		// ...WorldMatrixを求めたり
+			//		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+			//		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+			//		(*particleIterator).currentTime += kDeltaTime;
+			//	}
+			//	// CG3_01_02
+			//	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+			//	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
+			//	billboardMatrix.m[3][0] = 0.0f;
+			//	billboardMatrix.m[3][1] = 0.0f;
+			//	billboardMatrix.m[3][2] = 0.0f;
+			//	if (!useBillboard) {
+			//		billboardMatrix = MakeIdentity4x4();
+			//	}
+			//	Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+			//	Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+			//	Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
+			//	//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+			//	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+			//	if (numInstance < kNumMaxInstance) {
+			//		instancingData[numInstance].WVP = worldViewProjectionMatrix;
+			//		instancingData[numInstance].World = worldMatrix;
+			//		instancingData[numInstance].color = (*particleIterator).color;
+			//		instancingData[numInstance].color.w = alpha;
+			//		++numInstance;
+			//	}
+			//	++particleIterator;
+			//}
 			//	if (particles[index].lifeTime <= particles[index].currentTime) {
 			//		continue;
 			//	}
@@ -1553,17 +1547,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 			commandList->SetGraphicsRootSignature(rootSignature);
 			commandList->SetPipelineState(graphicsPipelineState);   // PSOを設定
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);  // VBVを設定
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferView);  // VBVを設定
 			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			// マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
+			//commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
 			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			// 描画(パーティクル)
-			commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
+			//commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
 
 			commandList->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定
 			// 描画！(DrawCall/ドローコール) 6個のインデックスを使用し一つのインスタンスを描画。その他は当面0で良い
@@ -1571,8 +1565,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// wvp用のCBufferの場所を設定
 			//commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 			
+			// 球体の描画。変更が必要なものだけ変更する
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewCircle); // VBVを設定
+			//  マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 			// ModelData描画
-			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
+			commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 			// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
 			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 		
@@ -1650,7 +1648,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
-	vertexResource->Release();
+	//vertexResource->Release();
 	graphicsPipelineState->Release();
 	signatureBlob->Release();
 	if (errorBlob)
