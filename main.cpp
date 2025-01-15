@@ -767,6 +767,78 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 分割数
 	const uint32_t kSubdivision = 16;
 	const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> VertexResourceSircle = CreateBufferResource(device, sizeof(VertexData) * kVertexCount);
+
+	VertexData* vertexDataSircle = nullptr;
+	VertexResourceSircle->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSircle));
+
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	// リソースの先頭のアドレスから使う
+	vertexBufferViewSprite.BufferLocation = VertexResourceSircle->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	// 1頂点あたりのサイズ
+	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+	// 経度分割1つ分の角度 φd
+	 const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
+	// 緯度分割1つ分の角度 Θd
+	 const float kLatEvery = float(M_PI) / float(kSubdivision);
+	// 緯度の方向に分割
+	 for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex; // Θ
+		// 経度の方向に分割しながら線を描く
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+			float lon = lonIndex * kLonEvery; // φ
+			// 頂点データを入力する。基準点a
+				vertexDataSircle[start].position = {cos(lat) * cos(lon),
+													sin(lat),
+													cos(lat) * sin(lon),
+													1.0f};
+
+				vertexDataSircle[start].texcoord = {float(lonIndex) / float(kSubdivision),
+													1.0f - float(latIndex) / float(kSubdivision)};
+
+				// b
+			    vertexDataSircle[start + 1].position = {cos(lat + kLatEvery) * cos(lon),
+														sin(lat + kLatEvery),
+														cos(lat + kLatEvery) * sin(lon),
+														1.0f};
+
+				vertexDataSircle[start + 1].texcoord = {float(lonIndex) / float(kSubdivision),
+														1.0f - float(latIndex + 1) / float(kSubdivision)};
+
+				// c
+			    vertexDataSircle[start + 2].position = {cos(lat) * cos(lon + kLonEvery),
+														sin(lat),
+														cos(lat) * sin(lon + kLonEvery),
+														1.0f};
+
+				vertexDataSircle[start + 2].texcoord = {float(lonIndex + 1) / float(kSubdivision),
+														1.0f - float(latIndex) / float(kSubdivision)};
+
+				// c
+			    vertexDataSircle[start + 3] = vertexDataSircle[start + 2];
+
+				// b
+			    vertexDataSircle[start + 4] = vertexDataSircle[start + 1];
+
+				// d
+			    vertexDataSircle[start + 5].position = {cos(lat + kLatEvery) * cos(lon + kLonEvery),
+														sin(lat + kLatEvery),
+														cos(lat + kLatEvery) * sin(lon + kLonEvery),
+														1.0f};
+				vertexDataSircle[start + 5].texcoord = {float(lonIndex + 1) / float(kSubdivision),
+														1.0f - float(latIndex + 1) / kSubdivision};
+		}
+	}
+	
+
+
+
 	// モデル読み込み
 	ModelData modelData = LoadObjFile("Resources", "plane.obj");
 	// Particle
@@ -866,60 +938,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
-
-	//// 経度分割1つ分の角度 φd
-	//const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
-	//// 緯度分割1つ分の角度 Θd
-	//const float kLatEvery = float(M_PI) / float(kSubdivision);
-	//// 緯度の方向に分割
-	//for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-	//	float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex; // Θ
-	//	// 経度の方向に分割しながら線を描く
-	//	for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-	//		uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-	//		float lon = lonIndex * kLonEvery; // φ
-	//		// 頂点データを入力する。基準点a
-	//			vertexData[start].position = {cos(lat) * cos(lon),
-	//										  sin(lat),
-	//										  cos(lat) * sin(lon),
-	//										  1.0f};
-
-	//			vertexData[start].texcoord = {float(lonIndex) / float(kSubdivision),
-	//										  1.0f - float(latIndex) / float(kSubdivision)};
-
-	//			// b
-	//			vertexData[start + 1].position = {cos(lat + kLatEvery) * cos(lon),
-	//											  sin(lat + kLatEvery), 
-	//											  cos(lat + kLatEvery) * sin(lon),
-	//											  1.0f};
-
-	//			vertexData[start + 1].texcoord = {float(lonIndex) / float(kSubdivision),
-	//											  1.0f - float(latIndex + 1) / float(kSubdivision)};
-
-	//			// c
-	//			vertexData[start + 2].position = {cos(lat) * cos(lon + kLonEvery), 
-	//											  sin(lat), 
-	//											  cos(lat) * sin(lon + kLonEvery),
-	//											  1.0f};
-
-	//			vertexData[start + 2].texcoord = {float(lonIndex + 1) / float(kSubdivision),
-	//											  1.0f - float(latIndex) / float(kSubdivision)};
-
-	//			// c
-	//			vertexData[start + 3] = vertexData[start + 2];
-
-	//			// b
-	//			vertexData[start + 4] = vertexData[start + 1];
-
-	//			// d
-	//			vertexData[start + 5].position = {cos(lat + kLatEvery) * cos(lon + kLonEvery),
-	//											  sin(lat + kLatEvery),
-	//											  cos(lat + kLatEvery) * sin(lon + kLonEvery),
-	//											  1.0f};
-	//			vertexData[start + 5].texcoord = {float(lonIndex + 1) / float(kSubdivision),
-	//											  1.0f - float(latIndex + 1) / kSubdivision};
-	//	}
-	//}
 
 
 
