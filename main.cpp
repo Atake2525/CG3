@@ -57,6 +57,25 @@ struct ParticleForGPU {
 	Vector4 color;
 };
 
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
+
+struct AccelerationField {
+	Vector3 acceleration;
+	AABB area;
+};
+
+bool IsCollision(const AABB& aabb, const Vector3& point) {
+	if ((aabb.min.x <= point.x && aabb.max.x >= point.x) && 
+		(aabb.min.y <= point.y && aabb.max.y >= point.y) &&
+		(aabb.min.z <= point.z && aabb.max.z >= point.z)) {
+		return true;
+	}
+	return false;
+}
+
 Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	Particle particle;
@@ -817,6 +836,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	emitter.frequency = 0.5f;
 	emitter.frequencyTime = 0.0f;
 
+	bool isAccelerationField = false;
+	AccelerationField accelerationField;
+	accelerationField.acceleration = {15.0f, 0.0f, 0.0f};
+	accelerationField.area.min = {-1.0f, -1.0f, -1.0f};
+	accelerationField.area.max = {1.0f, 1.0f, 1.0f};
+
 	//for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 	//	particles[index] = MakeNewParticle(randomEngine);
 	//	//instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1333,6 +1358,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 				ImGui::Checkbox("billboard", &useBillboard);
 				ImGui::Checkbox("start", &start);
+				ImGui::Checkbox("accelerationField", &isAccelerationField);
 				ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
 				ImGui::TreePop();
 			}
@@ -1366,9 +1392,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
 					continue;
 				}
+				// Fieldの範囲内のParticleには加速度を適用する
+				if (isAccelerationField) {
+					if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
+						(*particleIterator).velocity += accelerationField.acceleration * kDeltaTime;
+					}
+				}
+				//(*particleIterator).currentTime = (*particleIterator).currentTime;
+				(*particleIterator).currentTime += kDeltaTime;
 				float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-				(*particleIterator).transform.translate = (*particleIterator).transform.translate;
-				(*particleIterator).currentTime = (*particleIterator).currentTime;
+				(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
 				if (start) {
 					// ...WorldMatrixを求めたり
 					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
