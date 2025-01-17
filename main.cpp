@@ -255,10 +255,9 @@ ComPtr<IDxcBlob> CompileShader(
 	// Compilerに使用するProfile
 	const wchar_t* profile,
 	// 初期化で生成したものを3つ
-    IDxcUtils* dxcUtils,
-	IDxcCompiler3* dxcCompiler,
-	IDxcIncludeHandler* includeHandler
-)
+    ComPtr<IDxcUtils> dxcUtils, 
+	ComPtr<IDxcCompiler3> dxcCompiler, 
+	ComPtr<IDxcIncludeHandler> includeHandler)
 {
 	// これからシェーダーをコンパイルする旨をログに出す
 	Log(ConvertString(std::format(L"Begin CompilerShader, path:{}, profile:{}\n", filePath, profile)));
@@ -284,11 +283,11 @@ ComPtr<IDxcBlob> CompileShader(
 	};
 	// 実際にShaderをコンパイルする
 	ComPtr<IDxcResult> shaderResult = nullptr;
-	hr = dxcCompiler->Compile(
+	hr = dxcCompiler.Get()->Compile(
 		&shaderSourceBuffer,   // 読み込んだファイル
 		arguments,             // コンパイルオプション
 		_countof(arguments),   // コンパイルオプションの数
-		includeHandler,        // includeが含まれた諸々
+	    includeHandler.Get(),       // includeが含まれた諸々
 		IID_PPV_ARGS(&shaderResult) // コンパイル結果
 	);
 	//コンパイルエラーではなくdxcが起動できないなど致命的な状況
