@@ -1327,7 +1327,3 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	CoUninitialize();
 	return 0;
 }
-
-
-
-
