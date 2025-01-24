@@ -30,13 +30,13 @@ struct CameraForGPU {
 	Vector3 worldPosition;
 };
 
-struct Material
-{
-	Vector4	color;
+struct Material {
+	Vector4 color;
 	int32_t enableLighting;
 	float pad[3];
 	Matrix4x4 uvTransform;
 	float shininess;
+	Vector3 specularColor;
 };
 
 struct TransformationMatrix {
@@ -875,10 +875,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	materialData->enableLighting = true;
 	materialData->shininess = 70.0f;
+	materialData->specularColor = {1.0f, 1.0f, 1.0f};
 
 	// Lightingを有効にする
 	materialDataSprite->enableLighting = false;
 	materialDataSprite->shininess = 0.0f;
+	materialDataSprite->specularColor = {1.0f, 1.0f, 1.0f};
 	Transform uvTransformSprite{
 		{1.0f, 1.0f, 1.0f},
 		{0.0f, 0.0f, 0.0f},
@@ -1210,7 +1212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode("DirectionalLight")) {
-
+				ImGui::ColorEdit3("SpecularColor", &materialData->specularColor.x);
 				ImGui::ColorEdit4("color", &directionalLightData->color.x);
 				ImGui::SliderFloat3("Direction", &directionalLightData->direction.x, -1.0f, 1.0f);
 				ImGui::DragFloat("Insensity", &directionalLightData->intensity, 1.0f);
