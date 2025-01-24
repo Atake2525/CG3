@@ -13,6 +13,7 @@ struct Material
     int32_t enableLighting;
     float32_t4x4 uvTransform;
     float32_t shininess;
+    float32_t3 specularColor;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 struct PixelShaderOutput
@@ -43,7 +44,9 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     if (gMaterial.enableLighting != 0)
     { // Lightingする場合
-        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
+        // Half lambert
+        float NdotL = dot(normalize(input.normal), -gDirectionalLight.direction);
+        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
         
         // Phong Reflection Model
         // 計算式 R = reflect(L,N) specular = (V.R)n
@@ -57,14 +60,12 @@ PixelShaderOutput main(VertexShaderOutput input)
         float32_t3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        float32_t3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
+        float32_t3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * gMaterial.specularColor;
         
         // 拡散反射 + 鏡面反射
         output.color.rgb = diffuse + specular;
-        //output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.intensity * cos;
         // アルファは今まで通り
         output.color.a = gMaterial.color.a * textureColor.a;
-        //output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
     }
     else
     { // Lightingしない場合。前回までと同じ計算
