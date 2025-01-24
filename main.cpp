@@ -26,12 +26,17 @@ using namespace Microsoft::WRL;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+struct CameraForGPU {
+	Vector3 worldPosition;
+};
+
 struct Material
 {
 	Vector4	color;
 	int32_t enableLighting;
-	float padding[3];
+	float pad[3];
 	Matrix4x4 uvTransform;
+	float shininess;
 };
 
 struct TransformationMatrix {
@@ -479,7 +484,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifdef _DEBUG
 	ComPtr<ID3D12Debug1> debugController = nullptr;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-		;
 	{
 		// デバッグレイヤーを有効化する
 		debugController->EnableDebugLayer();
@@ -829,7 +833,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	D3D12_ROOT_PARAMETER rootParameters[5] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;     // CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;  // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                     // レジスタ番号0とバインド
@@ -843,6 +847,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
 	rootParameters[3].Descriptor.ShaderRegister = 1; // レジスタ番号1を使う
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // ConstantBufferView
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[4].Descriptor.ShaderRegister = 2; // b2
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -866,8 +873,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialData->uvTransform = MakeIdentity4x4();
 	materialDataSprite->uvTransform = MakeIdentity4x4();
 
+	materialData->enableLighting = true;
+	materialData->shininess = 70.0f;
+
 	// Lightingを有効にする
 	materialDataSprite->enableLighting = false;
+	materialDataSprite->shininess = 0.0f;
 	Transform uvTransformSprite{
 		{1.0f, 1.0f, 1.0f},
 		{0.0f, 0.0f, 0.0f},
@@ -992,7 +1003,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[5].normal = {0.0f, 0.0f, -1.0f};
 
 	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	ComPtr<ID3D12Resource> transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	ComPtr<ID3D12Resource> transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(TransformationMatrix));
 	// データを書き込む
 	TransformationMatrix* tranformationMatrixDataSprite = nullptr;
 	// 書き込むためのアドレスを取得
@@ -1076,13 +1087,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	///TransformationMatrix用のResourceを作る
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	ComPtr<ID3D12Resource> wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
+	ComPtr<ID3D12Resource> wvpResource = CreateBufferResource(device, sizeof(TransformationMatrix));
 	// データを書き込む
-	Matrix4x4* wvpData = nullptr;
+	TransformationMatrix* wvpData = nullptr;
 	// 書き込むためのアドレスを取得
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	// 単位行列を書き込んでおく
-	*wvpData = MakeIdentity4x4();
+	wvpData->WVP = MakeIdentity4x4();
 
 
 	// Transform変数を作る
@@ -1108,6 +1119,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 2;
 	indexDataSprite[3] = 1;  indexDataSprite[4] = 3;  indexDataSprite[5] = 2;
 		
+	// カメラ用のリソースを作成 Phong Reflection Model
+	ComPtr<ID3D12Resource> cameraResource = CreateBufferResource(device, sizeof(CameraForGPU));
+	// マテリアルにデータを書き込む
+	CameraForGPU* cameraData = nullptr;
+	// 書き込むためのアドレスを取得
+	cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraData));
+
+	cameraData->worldPosition = cameraTransform.translate;
+
+
 	//ゲームループ
 	MSG msg{};
 	//ウィンドウの×ボタンが押されるまでループ
@@ -1188,6 +1209,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 				ImGui::TreePop();
 			}
+			if (ImGui::TreeNode("DirectionalLight")) {
+
+				ImGui::ColorEdit4("color", &directionalLightData->color.x);
+				ImGui::SliderFloat3("Direction", &directionalLightData->direction.x, -1.0f, 1.0f);
+				ImGui::DragFloat("Insensity", &directionalLightData->intensity, 1.0f);
+				ImGui::TreePop();
+			}
 			if (ImGui::TreeNode("Texture")) {
 				ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 				ImGui::TreePop();
@@ -1263,7 +1291,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 			Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-			*wvpData = worldViewProjectionMatrix;
+			wvpData->WVP = worldViewProjectionMatrix;
+			wvpData->World = worldMatrix;
 
 
 
@@ -1287,9 +1316,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
-				// wvp用のCBufferの場所を設定
+
+			// wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 			// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後(球)
+			commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
 			commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 
 			commandList->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定
