@@ -61,6 +61,14 @@ struct DirectionalLight {
 	float intensity; //!< 輝度
 };
 
+struct PointLight {
+	Vector4 color; //!< ライトの色
+	Vector3 position; //!< ライトの向き
+	float intensity; //!< 輝度
+	float radius; //!< ライトの届く最大距離
+	float dacay; //!< 減衰率
+};
+
 MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
 	// 1, 中で必要となる変数の宣言
 	MaterialData materialData; // 構築するMaterialData
@@ -143,8 +151,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				//VertexData vertex = { position, texcoord, normal };
 				//modelData.vertices.push_back(vertex);
 				position.x *= -1.0f;
-				texcoord.y = 1.0f - texcoord.y;
 				normal.x *= -1.0f;
+				texcoord.y = 1.0f - texcoord.y;
 
 				triangle[faceVertex] = {position, texcoord, normal};
 			}
@@ -702,9 +710,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 分割数
 	const uint32_t kSubdivision = 16;
 	const uint32_t kVertexCount = kSubdivision * kSubdivision * 6;
-	// モデル読み込み
-	//ModelData modelData = LoadObjFile("Resources", "axis.obj");
-	//DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
+	
 	// 実際に頂点リソースを作る
 	ComPtr<ID3D12Resource> vertexResourceSphere = CreateBufferResource(device, sizeof(VertexData) * kVertexCount);
 	// 頂点バッファビューを作成する
@@ -728,7 +734,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	directionalLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
 	directionalLightData->direction = {0.0f, -1.0f, 0.0f};
-	directionalLightData->intensity = 1.0f;
+	directionalLightData->intensity = 0.0f;
+
+	ComPtr<ID3D12Resource> pointLightResource = CreateBufferResource(device, sizeof(PointLight));
+
+	PointLight* pointLightData = nullptr;
+	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
+
+	pointLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
+	pointLightData->position = {0.0f, 2.0f, 0.0f};
+	pointLightData->intensity = 1.0f;
+	pointLightData->radius = 5.0f;
+	pointLightData->dacay = 5.0f;
 
 	// 経度分割1つ分の角度 φd
 	const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
@@ -802,6 +819,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useMonsterBall = true;
 
 
+	// モデル読み込み
+	 ModelData modelDataTerrain = LoadObjFile("Resources", "terrain.obj");
+	 //DirectX::ScratchImage mipImages2 = LoadTexture(modelDataTerrain.material.textureFilePath);
+
+	 // 頂点リソースの作成
+	 ComPtr<ID3D12Resource> vertexResourceTerrain = CreateBufferResource(device, sizeof(VertexData) * modelDataTerrain.vertices.size());
+	 // 頂点バッファビューを作成する
+	 D3D12_VERTEX_BUFFER_VIEW vertexBufferViewTerrain{};
+	 vertexBufferViewTerrain.BufferLocation = vertexResourceTerrain->GetGPUVirtualAddress();
+	 vertexBufferViewTerrain.SizeInBytes = UINT(sizeof(VertexData) * modelDataTerrain.vertices.size()); // 使用するリソースのサイズは頂点サイズ
+	 vertexBufferViewTerrain.StrideInBytes = sizeof(VertexData); // １頂点あたりのサイズ
+
+	 // 頂点リソースにデータを書き込む
+	 VertexData* vertexDataTerrain = nullptr;
+	 vertexResourceTerrain->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataTerrain)); // 書き込むためのアドレス
+	 std::memcpy(vertexDataTerrain, modelDataTerrain.vertices.data(), sizeof(VertexData) * modelDataTerrain.vertices.size()); //頂点データをリソースにコピー
+
 	// RootSinature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -833,7 +867,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+	D3D12_ROOT_PARAMETER rootParameters[6] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;     // CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;  // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                     // レジスタ番号0とバインド
@@ -850,6 +884,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // ConstantBufferView
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
 	rootParameters[4].Descriptor.ShaderRegister = 2; // b2
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[5].Descriptor.ShaderRegister = 3;                    // b3
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -1053,6 +1090,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(device, metadata2);
 	UploadTextureData(textureResource2, mipImages2);
 
+	// 3枚目のTextureを読んで転送する
+	DirectX::ScratchImage mipImages3 = LoadTexture(modelDataTerrain.material.textureFilePath);
+	const DirectX::TexMetadata& metadata3 = mipImages3.GetMetadata();
+	ComPtr<ID3D12Resource> textureResource3 = CreateTextureResource(device, metadata3);
+	UploadTextureData(textureResource3, mipImages3);
 
 	
 
@@ -1071,6 +1113,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;// 2Dテクスチャ
 	srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
 
+	// metaDataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc3{};
+	srvDesc3.Format = metadata3.format;
+	srvDesc3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDesc3.Texture2D.MipLevels = UINT(metadata3.mipLevels);
+
 	// SRVを作成するDescriptorHeapの場所を決める
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0);
@@ -1086,6 +1135,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// SRVの生成
 	device->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
+	// SRVを作成するDescriptorHeapの場所を決める
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU3 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU3 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	// SRVの生成
+	device->CreateShaderResourceView(textureResource3.Get(), &srvDesc3, textureSrvHandleCPU3);
+
 
 	///TransformationMatrix用のResourceを作る
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
@@ -1099,7 +1154,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	// Transform変数を作る
-	Transform transform{ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	Transform transform{ {1.0f, 1.0f, 1.0f}, {0.0f, -1.58f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,-5.0f} };
 
@@ -1211,11 +1266,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 				ImGui::TreePop();
 			}
-			if (ImGui::TreeNode("DirectionalLight")) {
+			if (ImGui::TreeNode("Lighting")) {
 				ImGui::ColorEdit3("SpecularColor", &materialData->specularColor.x);
-				ImGui::ColorEdit4("color", &directionalLightData->color.x);
-				ImGui::SliderFloat3("Direction", &directionalLightData->direction.x, -1.0f, 1.0f);
-				ImGui::DragFloat("Insensity", &directionalLightData->intensity, 1.0f);
+				if (ImGui::TreeNode("DirectionalLight")) {
+					ImGui::ColorEdit4("Color", &directionalLightData->color.x);
+					ImGui::SliderFloat3("Direction", &directionalLightData->direction.x, -2.0f, 2.0f);
+					ImGui::DragFloat("Insensity", &directionalLightData->intensity, 1.0f);
+					ImGui::TreePop();
+				}
+				if (ImGui::TreeNode("PointLight")) {
+					ImGui::ColorEdit4("Color", &pointLightData->color.x);
+					ImGui::DragFloat3("Positoin", &pointLightData->position.x, 0.1f);
+					ImGui::SliderFloat("radius", &pointLightData->radius, 0.0f, 10.0f);
+					ImGui::SliderFloat("dacay", &pointLightData->dacay, 0.0f, 10.0f);
+					ImGui::DragFloat("Insensity", &pointLightData->intensity, 1.0f);
+					ImGui::TreePop();
+				}
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode("Texture")) {
@@ -1318,6 +1384,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
+			commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 
 			// wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
@@ -1328,15 +1395,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定
 			// 描画！(DrawCall/ドローコール) 6個のインデックスを使用し一つのインスタンスを描画。その他は当面0で良い
 
-			//Spriteの描画。変更が必要なものだけ変更する
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
-			// マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-			// TransformationMatrixCBbufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			// 描画
-			commandList->DrawInstanced(6, 1, 0, 0);
+			// ModelTerrain
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewTerrain); // VBVを設定
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+			commandList->DrawInstanced(UINT(modelDataTerrain.vertices.size()), 1, 0, 0);
+
+
+			////Spriteの描画。変更が必要なものだけ変更する
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
+			//// マテリアルCBufferの場所を設定
+			//commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			//// TransformationMatrixCBbufferの場所を設定
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			//// 描画
+			//commandList->DrawInstanced(6, 1, 0, 0);
 
 			 
 			// 実際のcommandListのImGuiの描画コマンドを積む
