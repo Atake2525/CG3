@@ -35,6 +35,15 @@ struct Camera
 };
 ConstantBuffer<Camera> gCamera : register(b2);
 
+struct PointLight {
+    float32_t4 color; //!< ライトの色
+    float32_t3 position; //!< ライトの位置
+    float intensity; //!< 輝度
+    float radius; //!< ライトの届く最大距離
+    float dacay; //!< 減衰率
+};
+ConstantBuffer<PointLight> gPointLight : register(b3);
+
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
@@ -51,23 +60,46 @@ PixelShaderOutput main(VertexShaderOutput input)
         // Phong Reflection Model
         // 計算式 R = reflect(L,N) specular = (V.R)n
         float32_t3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
-        float32_t3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
+        //float32_t3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
     
         // HalfVectorを求めて計算する
         float32_t3 halfVector = normalize(-gDirectionalLight.direction + toEye);
         float NDotH = dot(normalize(input.normal), halfVector);
         
-        float RdotE = dot(reflectLight, toEye);
+        //float RdotE = dot(reflectLight, toEye);
         float specularPow = pow(saturate(NDotH), gMaterial.shininess); // 反射強度
         
+        // pointLight
+        float32_t3 pointLightDirection = normalize(input.worldPosition - gPointLight.position);
+        
+        float NdotLPointLight = dot(normalize(input.normal), -pointLightDirection);
+        float cosPointLight = pow(NdotLPointLight * 0.5f + 0.5f, 2.0f);
+        
+        float32_t3 halfVectorPointLight = normalize(-pointLightDirection + toEye);
+        float NDotHPointLight = dot(normalize(input.normal), halfVectorPointLight);
+        
+        float specularPowPointLight = pow(saturate(NDotHPointLight), gMaterial.shininess);
+        
+        float32_t distance = length(gPointLight.position - input.worldPosition); // ポイントライトへの距離
+        float32_t factor = pow(saturate(-distance / gPointLight.radius + 1.0f), gPointLight.dacay); // 逆に上による減衰係数
+        
+        
+        
         // 拡散反射
-        float32_t3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+        float32_t3 diffuseDirectionalLight = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        float32_t3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * gMaterial.specularColor;
+        float32_t3 specularDirectionalLight = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * gMaterial.specularColor;
+        
+         // 拡散反射
+        float32_t3 diffusePointLight = gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cosPointLight * gPointLight.intensity * factor;
+        
+        // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
+        float32_t3 specularPointLight = gPointLight.color.rgb * gPointLight.intensity * factor * specularPowPointLight * gMaterial.specularColor;
+        
         
         // 拡散反射 + 鏡面反射
-        output.color.rgb = diffuse + specular;
+        output.color.rgb = diffuseDirectionalLight + specularDirectionalLight + diffusePointLight + specularPointLight;
         // アルファは今まで通り
         output.color.a = gMaterial.color.a * textureColor.a;
     }
