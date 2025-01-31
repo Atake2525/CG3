@@ -1021,22 +1021,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// spriteの設定
 	// 1枚目の三角形
-	vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f }; // 左下
-	vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
+	vertexDataSprite[0].position = { 0.0f, 0.0f, 0.0f, 1.0f }; // 左上
+	vertexDataSprite[0].texcoord = { 0.0f, 0.0f };
 	vertexDataSprite[0].normal = {0.0f, 0.0f, -1.0f};
-	vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f, 1.0f }; // 左上
-	vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
+	vertexDataSprite[1].position = { 640.0f, 0.0f, 0.0f, 1.0f }; // 右上
+	vertexDataSprite[1].texcoord = { 1.0f, 0.0f };
 	vertexDataSprite[1].normal = {0.0f, 0.0f, -1.0f};
-	vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f }; // 右下
-	vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
+	vertexDataSprite[2].position = { 0.0f, 360.0f, 0.0f, 1.0f }; // 左下
+	vertexDataSprite[2].texcoord = { 0.0f, 1.0f };
 	vertexDataSprite[2].normal = {0.0f, 0.0f, -1.0f};
 	// 2枚目の三角形
-	vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f }; // 左上
-	vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
-	vertexDataSprite[3].normal = {0.0f, 0.0f, -1.0f};
-	vertexDataSprite[4].position = { 640.0f, 0.0f, 0.0f, 1.0f }; // 右上
-	vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
-	vertexDataSprite[4].normal = {0.0f, 0.0f, -1.0f};
+	vertexDataSprite[3].position = vertexDataSprite[2].position; // 左下
+	vertexDataSprite[3].texcoord = vertexDataSprite[2].texcoord;
+	vertexDataSprite[3].normal = vertexDataSprite[2].normal;
+	vertexDataSprite[4].position = vertexDataSprite[1].position; // 右上
+	vertexDataSprite[4].texcoord = vertexDataSprite[1].texcoord;
+	vertexDataSprite[4].normal = vertexDataSprite[1].normal;
 	vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f }; // 右下
 	vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
 	vertexDataSprite[5].normal = {0.0f, 0.0f, -1.0f};
@@ -1158,7 +1158,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,-5.0f} };
 
-	Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	//Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.1f, 100.0f);
 
 	ComPtr<ID3D12Resource> indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
 
