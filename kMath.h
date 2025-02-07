@@ -8,6 +8,7 @@
 #include <cassert>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <numbers>
 
 /*struct Sphere
 {
@@ -88,6 +89,9 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 
 //逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
+
+// 正規化
+Vector3 Normalize(const Vector3& v);
 
 
 // 1, 透視投影行列

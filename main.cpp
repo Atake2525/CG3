@@ -13,6 +13,7 @@
 #include "Vector4.h"
 #include "Matrix4x4.h"
 #include "kMath.h"
+#include "algorithm"
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
@@ -63,10 +64,22 @@ struct DirectionalLight {
 
 struct PointLight {
 	Vector4 color; //!< ライトの色
-	Vector3 position; //!< ライトの向き
+	Vector3 position; //!< ライトの位置
 	float intensity; //!< 輝度
 	float radius; //!< ライトの届く最大距離
 	float dacay; //!< 減衰率
+};
+
+struct SpotLight {
+	Vector4 color;//!< ライトの色
+	Vector3 position;//!< ライトの位置
+	float intensity;//!< 輝度
+	Vector3 direction;//!< ライトの向き
+	float distance; //!< ライトの届く最大距離
+	float dacay; //!< 減衰率
+	float cosAngle; //!< スポットライトの余弦
+	float cosFalloffStart; // falloffが開始される角度
+	float padding[2];
 };
 
 MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
@@ -743,9 +756,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	pointLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
 	pointLightData->position = {0.0f, 2.0f, 0.0f};
-	pointLightData->intensity = 1.0f;
+	pointLightData->intensity = 0.0f;
 	pointLightData->radius = 5.0f;
 	pointLightData->dacay = 5.0f;
+
+	ComPtr<ID3D12Resource> spotLightResource = CreateBufferResource(device, sizeof(SpotLight));
+
+	SpotLight* spotLightData = nullptr;
+	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+
+	spotLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
+	spotLightData->position = {2.0f, 1.25f, 0.0f};
+	spotLightData->distance = 7.0f;
+	spotLightData->direction = Normalize({-1.0f, -1.0f, 0.0f});
+	spotLightData->intensity = 4.0f;
+	spotLightData->dacay = 2.0f;
+	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);
+	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 2.6f);
 
 	// 経度分割1つ分の角度 φd
 	const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
@@ -867,7 +894,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[6] = {};
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;     // CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;  // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                     // レジスタ番号0とバインド
@@ -887,6 +914,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
 	rootParameters[5].Descriptor.ShaderRegister = 3;                    // b3
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[6].Descriptor.ShaderRegister = 4;                    // b3
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -1156,7 +1186,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Transform変数を作る
 	Transform transform{ {1.0f, 1.0f, 1.0f}, {0.0f, -1.58f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
-	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,-5.0f} };
+	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, { 0.36f, 0.0f, 0.0f}, {0.0f, 6.0f, -19.0f} };
 
 	//Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.1f, 100.0f);
@@ -1283,6 +1313,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::DragFloat("Insensity", &pointLightData->intensity, 1.0f);
 					ImGui::TreePop();
 				}
+				if (ImGui::TreeNode("SpotLight")) {
+					ImGui::ColorEdit4("Color", &spotLightData->color.x);
+					ImGui::DragFloat3("Positoin", &spotLightData->position.x, 0.1f);
+					ImGui::DragFloat3("Direction", &spotLightData->direction.x, 0.1f);
+					ImGui::DragFloat("cosAngle", &spotLightData->cosAngle, 0.01f);
+					ImGui::DragFloat("cosFalloffStart", &spotLightData->cosFalloffStart, 0.01f);
+					ImGui::SliderFloat("distance", &spotLightData->distance, 0.0f, 10.0f);
+					ImGui::SliderFloat("dacay", &spotLightData->dacay, 0.0f, 10.0f);
+					ImGui::DragFloat("Insensity", &spotLightData->intensity, 1.0f);
+					ImGui::TreePop();
+				}
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode("Texture")) {
@@ -1301,6 +1342,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::End();
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
+
+			// cosFalloffStartがcosAngleより下にならないように調整
+			spotLightData->cosFalloffStart = max(spotLightData->cosFalloffStart, spotLightData->cosAngle);
+			
 
 			// 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に書き換える
 			//ImGui::ShowDemoWindow();
@@ -1383,14 +1428,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(4, directionalLightResource->GetGPUVirtualAddress());
 
 			commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+
+			commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
 			// wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 			// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後(球)
-			commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 			commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 
 			commandList->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定

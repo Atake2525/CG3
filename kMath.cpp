@@ -273,6 +273,15 @@ Matrix4x4 Inverse(const Matrix4x4& m) {
 	return ans;
 };
 
+// 正規化
+Vector3 Normalize(const Vector3& v) {
+	Vector3 ans;
+	ans.x = v.x / sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+	ans.y = v.y / sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+	ans.z = v.z / sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+	return ans;
+};
+
 
 // 1, 透視投影行列
 Matrix4x4 MakePrespectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
