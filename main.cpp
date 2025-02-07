@@ -13,6 +13,7 @@
 #include "Vector4.h"
 #include "Matrix4x4.h"
 #include "kMath.h"
+#include "algorithm"
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
@@ -77,6 +78,7 @@ struct SpotLight {
 	float distance; //!< ライトの届く最大距離
 	float dacay; //!< 減衰率
 	float cosAngle; //!< スポットライトの余弦
+	float cosFalloffStart; // falloffが開始される角度
 	float padding[2];
 };
 
@@ -770,6 +772,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spotLightData->intensity = 4.0f;
 	spotLightData->dacay = 2.0f;
 	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);
+	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 2.6f);
 
 	// 経度分割1つ分の角度 φd
 	const float kLonEvery = float(M_PI) * 2.0f / float(kSubdivision);
@@ -1315,6 +1318,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::DragFloat3("Positoin", &spotLightData->position.x, 0.1f);
 					ImGui::DragFloat3("Direction", &spotLightData->direction.x, 0.1f);
 					ImGui::DragFloat("cosAngle", &spotLightData->cosAngle, 0.01f);
+					ImGui::DragFloat("cosFalloffStart", &spotLightData->cosFalloffStart, 0.01f);
 					ImGui::SliderFloat("distance", &spotLightData->distance, 0.0f, 10.0f);
 					ImGui::SliderFloat("dacay", &spotLightData->dacay, 0.0f, 10.0f);
 					ImGui::DragFloat("Insensity", &spotLightData->intensity, 1.0f);
@@ -1338,6 +1342,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::End();
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
+
+			// cosFalloffStartがcosAngleより下にならないように調整
+			spotLightData->cosFalloffStart = max(spotLightData->cosFalloffStart, spotLightData->cosAngle);
+			
 
 			// 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に書き換える
 			//ImGui::ShowDemoWindow();

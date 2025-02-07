@@ -52,6 +52,7 @@ struct SpotLight {
     float32_t distance; //!< ライトの届く最大距離
     float32_t dacay; //!< 減衰率
     float32_t cosAngle; //!< スポットライトの余弦
+    float32_t cosFalloffStart; // falloffが開始される角度
 };
 ConstantBuffer<SpotLight> gSpotLight : register(b4);
 
@@ -98,7 +99,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         float32_t3 spotLightDirectionOnSurFace = normalize(input.worldPosition - gSpotLight.position);
         
         float32_t cosAngle = dot(spotLightDirectionOnSurFace, gSpotLight.direction);
-        float32_t falloffFactor = saturate((cosAngle - gSpotLight.cosAngle) / (1.0f - gSpotLight.cosAngle));
+        float32_t falloffFactor = saturate((cosAngle - gSpotLight.cosAngle) / (gSpotLight.cosFalloffStart - gSpotLight.cosAngle));
         
         float NdotLSpotLight = dot(normalize(input.normal), -spotLightDirectionOnSurFace);
         float cosSpotLight = pow(NdotLSpotLight * 0.5f + 0.5f, 2.0f);
@@ -124,7 +125,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         // SpotLight
          // 拡散反射
-        float32_t3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor;
+        float32_t3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
         float32_t3 specularSpotLight = gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * falloffFactor * gMaterial.specularColor * specularPow;
