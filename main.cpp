@@ -1051,25 +1051,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// spriteの設定
 	// 1枚目の三角形
-	vertexDataSprite[0].position = { 0.0f, 0.0f, 0.0f, 1.0f }; // 左上
-	vertexDataSprite[0].texcoord = { 0.0f, 0.0f };
-	vertexDataSprite[0].normal = {0.0f, 0.0f, -1.0f};
-	vertexDataSprite[1].position = { 640.0f, 0.0f, 0.0f, 1.0f }; // 右上
-	vertexDataSprite[1].texcoord = { 1.0f, 0.0f };
-	vertexDataSprite[1].normal = {0.0f, 0.0f, -1.0f};
-	vertexDataSprite[2].position = { 0.0f, 360.0f, 0.0f, 1.0f }; // 左下
-	vertexDataSprite[2].texcoord = { 0.0f, 1.0f };
-	vertexDataSprite[2].normal = {0.0f, 0.0f, -1.0f};
-	// 2枚目の三角形
-	vertexDataSprite[3].position = vertexDataSprite[2].position; // 左下
-	vertexDataSprite[3].texcoord = vertexDataSprite[2].texcoord;
-	vertexDataSprite[3].normal = vertexDataSprite[2].normal;
-	vertexDataSprite[4].position = vertexDataSprite[1].position; // 右上
-	vertexDataSprite[4].texcoord = vertexDataSprite[1].texcoord;
-	vertexDataSprite[4].normal = vertexDataSprite[1].normal;
-	vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f }; // 右下
-	vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
-	vertexDataSprite[5].normal = {0.0f, 0.0f, -1.0f};
+	//vertexDataSprite[0].position = { 0.0f, 0.0f, 0.0f, 1.0f }; // 左上
+	//vertexDataSprite[0].texcoord = { 0.0f, 0.0f };
+	//vertexDataSprite[0].normal = {0.0f, 0.0f, -1.0f};
+	//vertexDataSprite[1].position = { 640.0f, 0.0f, 0.0f, 1.0f }; // 右上
+	//vertexDataSprite[1].texcoord = { 1.0f, 0.0f };
+	//vertexDataSprite[1].normal = {0.0f, 0.0f, -1.0f};
+	//vertexDataSprite[2].position = { 0.0f, 360.0f, 0.0f, 1.0f }; // 左下
+	//vertexDataSprite[2].texcoord = { 0.0f, 1.0f };
+	//vertexDataSprite[2].normal = {0.0f, 0.0f, -1.0f};
+	//// 2枚目の三角形
+	//vertexDataSprite[3].position = vertexDataSprite[2].position; // 左下
+	//vertexDataSprite[3].texcoord = vertexDataSprite[2].texcoord;
+	//vertexDataSprite[3].normal = vertexDataSprite[2].normal;
+	//vertexDataSprite[4].position = vertexDataSprite[1].position; // 右上
+	//vertexDataSprite[4].texcoord = vertexDataSprite[1].texcoord;
+	//vertexDataSprite[4].normal = vertexDataSprite[1].normal;
+	//vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f }; // 右下
+	//vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
+	//vertexDataSprite[5].normal = {0.0f, 0.0f, -1.0f};
+
+	vertexDataSprite[0].position = {0.0f, 0.0f, 0.0f, 1.0f}; // 左上
+	vertexDataSprite[0].texcoord = {0.0f, 0.0f};
+	vertexDataSprite[1].position = {640.0f, 0.0f, 0.0f, 1.0f}; // 右上
+	vertexDataSprite[1].texcoord = {1.0f, 0.0f};
+	vertexDataSprite[2].position = {640.0f, 360.0f, 0.0f, 1.0f}; // 右下
+	vertexDataSprite[2].texcoord = {1.0f, 1.0f};
+	vertexDataSprite[3].position = {0.0f, 360.0f, 0.0f, 1.0f}; // 左下
+	vertexDataSprite[3].texcoord = {0.0f, 1.0f};
 
 	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	ComPtr<ID3D12Resource> transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(TransformationMatrix));
@@ -1204,8 +1213,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// インデックスリソースにデータを書き込む
 	uint32_t* indexDataSprite = nullptr;
 	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
-	indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 2;
-	indexDataSprite[3] = 1;  indexDataSprite[4] = 3;  indexDataSprite[5] = 2;
+	indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 3;
+	indexDataSprite[3] = 3;  indexDataSprite[4] = 1;  indexDataSprite[5] = 2;
 		
 	// カメラ用のリソースを作成 Phong Reflection Model
 	ComPtr<ID3D12Resource> cameraResource = CreateBufferResource(device, sizeof(CameraForGPU));
@@ -1440,7 +1449,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 			commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 
-			commandList->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定
 			// 描画！(DrawCall/ドローコール) 6個のインデックスを使用し一つのインスタンスを描画。その他は当面0で良い
 
 			// ModelTerrain
@@ -1449,15 +1457,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->DrawInstanced(UINT(modelDataTerrain.vertices.size()), 1, 0, 0);
 
 
-			////Spriteの描画。変更が必要なものだけ変更する
-			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
-			//// マテリアルCBufferの場所を設定
-			//commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-			//// TransformationMatrixCBbufferの場所を設定
-			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//// 描画
-			//commandList->DrawInstanced(6, 1, 0, 0);
+			//Spriteの描画。変更が必要なものだけ変更する
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
+
+			commandList->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定
+
+			// マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+			// TransformationMatrixCBbufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			// 描画
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 			 
 			// 実際のcommandListのImGuiの描画コマンドを積む
