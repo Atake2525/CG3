@@ -8,13 +8,14 @@
 
 #pragma once
 
+class WinApp;
 
 class Input {
 public:
 	// namespcae省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-	void Initialize(HINSTANCE hInstance, HWND hwnd);
+	void Initialize(WinApp* winApp);
 	void Update();
 
 public:
@@ -32,6 +33,8 @@ public:
 private:
 	// キーボードデバイス
 	ComPtr<IDirectInputDevice8> keyboard;
+
+	WinApp* winApp_ = nullptr;
 
 	// 全キーの状態
 	BYTE key[256] = {};
