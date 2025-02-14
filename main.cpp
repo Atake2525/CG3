@@ -1528,6 +1528,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(SUCCEEDED(hr));
 		}
 	}
+	
+#ifdef DEBUG
+	debugController->Release();
+#endif // DEBUG
 	// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -1535,11 +1539,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			
 
 	CloseHandle(fenceEvent);
-	
-#ifdef DEBUG
-	debugController->Release();
-#endif // DEBUG
 	CloseWindow(hwnd);
+	CoUninitialize();
 
 	delete input;
 
@@ -1554,6 +1555,5 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{
 
 	}
-	CoUninitialize();
 	return 0;
 }
