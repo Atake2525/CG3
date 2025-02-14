@@ -13,6 +13,9 @@
 #include "Vector4.h"
 #include "Matrix4x4.h"
 #include "kMath.h"
+
+#include "Input.h"
+
 #include "algorithm"
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
@@ -514,6 +517,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #endif // DEBUG
 
+	Input* input = nullptr;
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
+
 	// 出ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
@@ -525,7 +532,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 	// 使用するアダプタ用の変数、最初、nullptrを入れておく
-	IDXGIAdapter4* useAdapter = nullptr;
+	ComPtr<IDXGIAdapter4> useAdapter;
 	// 良い順にアダプタを読む
 	for (UINT i = 0; i < dxgiFactory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter)) != DXGI_ERROR_NOT_FOUND; i++) {
 		// アダプターの情報を取得する
@@ -550,7 +557,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 高い順に生成できるか試していく
 	for (size_t i = 0; i < _countof(featureLevels); i++) {
 		// 採用したアダプターでデバイスを生成
-		hr = D3D12CreateDevice(useAdapter, featureLevels[i], IID_PPV_ARGS(&device));
+		hr = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&device));
 		// 指定した昨日レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			// 生成できなのでログ出力を行ってループを抜ける
@@ -611,7 +618,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 	// スワップチェーンを作成する
-	IDXGISwapChain4* swapChain = nullptr;
+	ComPtr<IDXGISwapChain4> swapChain;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	swapChainDesc.Width = kClientWidth;                          // 画面の幅。ウィンドウのクライアント領域を同じものにしておく
 	swapChainDesc.Height = kClientHeight;                        // 画面の高さ。ウィンドウのクライアント量良い気を同じものにしておく
@@ -621,7 +628,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	swapChainDesc.BufferCount = 2;                               // ダブルバッファ
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;    // モニタに移したら、中身を破棄
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 
 	// RTV様のヒープでディスクリプタの数は2。RTVはShader内で触るものではないので、ShaderVisibleはfalse
@@ -1352,6 +1359,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
 
+			if (input->ReturnKey(DIK_0)) {
+				OutputDebugStringA("Hit 0 \n");
+			}
+
 			// cosFalloffStartがcosAngleより下にならないように調整
 			spotLightData->cosFalloffStart = max(spotLightData->cosFalloffStart, spotLightData->cosAngle);
 			
@@ -1498,7 +1509,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandQueue->Signal(fence.Get(), fenceValue);
 
 			
-
+			input->Update();
 			
 
 			// Fenceの値が指定したSignal値にたどり着いているか確認する
@@ -1530,6 +1541,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif // DEBUG
 	CloseWindow(hwnd);
 
+	delete input;
 
 	//リソースリークチェック
 	ComPtr<IDXGIDebug1> debug;

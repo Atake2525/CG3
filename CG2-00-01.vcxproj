@@ -97,6 +97,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externels\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externels\imgui\imgui_tables.cpp" />
     <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="kMath.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -109,6 +110,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externels\imgui\imstb_rectpack.h" />
     <ClInclude Include="externels\imgui\imstb_textedit.h" />
     <ClInclude Include="externels\imgui\imstb_truetype.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="kMath.h" />
     <ClInclude Include="Matrix3x3.h" />
     <ClInclude Include="Vector2.h" />
