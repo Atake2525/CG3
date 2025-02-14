@@ -10,12 +10,6 @@
 #include <math.h>
 #include <numbers>
 
-/*struct Sphere
-{
-	Vector3 center; //!< 中心点
-	float radius;   //!< 半径
-};*/
-
 struct Transform
 {
 	Vector3 scale;
