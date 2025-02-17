@@ -28,6 +28,12 @@
     <Filter Include="WinApp">
       <UniqueIdentifier>{a07fac63-5f18-47ef-91de-ff34f01b8f9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Base">
+      <UniqueIdentifier>{fab87c20-33cd-42e1-8180-62d6aa519162}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{fe5391fc-724a-47a9-bf53-33dd5314fdaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externels\imgui\imgui.cpp">
@@ -62,6 +68,15 @@
     </ClCompile>
     <ClCompile Include="WinApp.cpp">
       <Filter>WinApp</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXBase.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtility.cpp">
+      <Filter>Log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +127,15 @@
     </ClInclude>
     <ClInclude Include="WinApp.h">
       <Filter>WinApp</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXBase.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtility.h">
+      <Filter>Log</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
