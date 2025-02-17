@@ -28,11 +28,17 @@
     <Filter Include="WinApp">
       <UniqueIdentifier>{a07fac63-5f18-47ef-91de-ff34f01b8f9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Base">
-      <UniqueIdentifier>{fab87c20-33cd-42e1-8180-62d6aa519162}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Log">
       <UniqueIdentifier>{fe5391fc-724a-47a9-bf53-33dd5314fdaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sprite">
+      <UniqueIdentifier>{e4448be6-2a98-4c50-bd65-6447aab1756a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LeakChecker">
+      <UniqueIdentifier>{f1ea48c1-a5bf-48cb-851a-45ccd860ff17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BaseEngine">
+      <UniqueIdentifier>{fab87c20-33cd-42e1-8180-62d6aa519162}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -70,13 +76,22 @@
       <Filter>WinApp</Filter>
     </ClCompile>
     <ClCompile Include="DirectXBase.cpp">
-      <Filter>Base</Filter>
+      <Filter>BaseEngine</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>Log</Filter>
     </ClCompile>
     <ClCompile Include="StringUtility.cpp">
       <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteBase.cpp">
+      <Filter>Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DResourceLeakChecker.cpp">
+      <Filter>LeakChecker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,13 +144,22 @@
       <Filter>WinApp</Filter>
     </ClInclude>
     <ClInclude Include="DirectXBase.h">
-      <Filter>Base</Filter>
+      <Filter>BaseEngine</Filter>
     </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Log</Filter>
     </ClInclude>
     <ClInclude Include="StringUtility.h">
       <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteBase.h">
+      <Filter>Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DResourceLeakChecker.h">
+      <Filter>LeakChecker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
