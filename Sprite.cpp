@@ -2,6 +2,26 @@
 #include "SpriteBase.h"
 #include "DirectXBase.h"
 
+//void Sprite::SetTransform(Transform transform){ 
+//	position.x = transform.translate.x;
+//	position.y = transform.translate.y;
+//	rotation = transform.rotate.z;
+//	scale.x = transform.rotate.x;
+//	scale.y = transform.rotate.y;
+//}
+//
+//void Sprite::SetMaterial(Material* material){ 
+//	materialData = material; 
+//}
+
+void Sprite::SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color){ 
+	this->position = position; 
+	this->rotation = rotation;
+	this->scale = scale;
+	materialData->color = color;
+}
+
+
 void Sprite::Initialize(SpriteBase* spriteBase) { 
 	spriteBase_ = spriteBase;
 
@@ -33,11 +53,11 @@ void Sprite::Update() {
 	// spriteの設定
 	vertexData[0].position = {0.0f, 0.0f, 0.0f, 1.0f}; // 左上
 	vertexData[0].texcoord = {0.0f, 0.0f};
-	vertexData[1].position = {640.0f, 0.0f, 0.0f, 1.0f}; // 右上
+	vertexData[1].position = {1.0f, 0.0f, 0.0f, 1.0f}; // 右上
 	vertexData[1].texcoord = {1.0f, 0.0f};
-	vertexData[2].position = {640.0f, 360.0f, 0.0f, 1.0f}; // 右下
+	vertexData[2].position = {1.0f, 1.0f, 0.0f, 1.0f}; // 右下
 	vertexData[2].texcoord = {1.0f, 1.0f};
-	vertexData[3].position = {0.0f, 360.0f, 0.0f, 1.0f}; // 左下
+	vertexData[3].position = {0.0f, 1.0f, 0.0f, 1.0f}; // 左下
 	vertexData[3].texcoord = {0.0f, 1.0f};
 
 	indexData[0] = 0;
@@ -58,6 +78,12 @@ void Sprite::Update() {
 	    {0.0f, 0.0f, 0.0f},
 	    {0.0f, 0.0f, 0.0f},
 	};
+
+	transform.translate = {position.x, position.y, 0.0f};
+	transform.rotate = {0.0f, 0.0f, rotation};
+	transform.scale = {scale.x, scale.y, 0.1f};
+
+
 
 	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform.scale);
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform.rotate.z));

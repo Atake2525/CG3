@@ -54,6 +54,12 @@ struct Material {
 	Vector3 specularColor;
 };
 
+struct Transform {
+	Vector3 scale;
+	Vector3 rotate;
+	Vector3 translate;
+};
+
 struct TransformationMatrix {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
@@ -64,10 +70,31 @@ struct MaterialData
 	std::string textureFilePath;
 };
 
+struct VertexData {
+	Vector4 position;
+	Vector2 texcoord;
+	Vector3 normal;
+};
+
 struct ModelData
 {
 	std::vector<VertexData> vertices;
 	MaterialData material;
+};
+
+struct Particle {
+	Transform transform;
+	Vector3 velocity;
+	Vector4 color;
+	float lifeTime;
+	float currentTime;
+};
+
+struct Emitter {
+	Transform transform; //!< エミッタのTransform
+	uint32_t count;      //!< 発生数
+	float frequency;     //!< 発生頻度
+	float frequencyTime; //!< 頻度用時刻
 };
 
 struct DirectionalLight {
@@ -221,6 +248,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* sprite = nullptr;
 	sprite = new Sprite();
 	sprite->Initialize(spriteBase);
+	sprite->SetScale(Vector2{200.0f, 200.0f});
 
 	Input* input = nullptr;
 	input = new Input();
@@ -710,7 +738,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	cameraData->worldPosition = cameraTransform.translate;
 
-
+	Vector2 position = sprite->GetPosition();
+	float rotation = sprite->GetRotation();
+	Vector2 scale = sprite->GetScale();
+	Vector4 color = sprite->GetColor();
 	//ゲームループ
 	/*MSG msg{};*/
 	//ウィンドウの×ボタンが押されるまでループ
@@ -735,7 +766,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (ImGui::TreeNode("ColorCode")){
 				ImGui::DragFloat3("RGB", &materialData->color.x, 0.01f);
 				ImGui::ColorEdit3("RGB", &materialData->color.x);
-				//ImGui::ColorEdit3("RGBSprite", &materialDataSprite->color.x);
+				ImGui::ColorEdit3("RGBSprite", &color.x);
 				ImGui::SliderFloat("R", &materialData->color.x, 0.0f, 1.0f);
 				ImGui::SliderFloat("G", &materialData->color.y, 0.0f, 1.0f);
 				ImGui::SliderFloat("B", &materialData->color.z, 0.0f, 1.0f);
@@ -781,16 +812,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
 				ImGui::TreePop();
 			}
-			/*if (ImGui::TreeNode("SpriteSTR"))
+			if (ImGui::TreeNode("SpriteSTR"))
 			{
-				ImGui::DragFloat3("Scale", &transformSprite.scale.x, 0.01f);
-				ImGui::DragFloat3("Rotate", &transformSprite.rotate.x, 0.01f);
-				ImGui::DragFloat3("Translate", &transformSprite.translate.x, 1.0f);
-				ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-				ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+				ImGui::DragFloat2("Scale", &scale.x, 1.0f);
+				ImGui::DragFloat("Rotate", &rotation, 0.01f);
+				ImGui::DragFloat2("Translate", &position.x, 1.0f);
+				//ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+				//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+				//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 				ImGui::TreePop();
-			}*/
+			}
 			if (ImGui::TreeNode("Lighting")) {
 				ImGui::ColorEdit3("SpecularColor", &materialData->specularColor.x);
 				if (ImGui::TreeNode("DirectionalLight")) {
@@ -849,6 +880,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
 
+			sprite->SetStatus(position, rotation, scale, color);
 			sprite->Update();
 
 			directxBase->PreDraw();

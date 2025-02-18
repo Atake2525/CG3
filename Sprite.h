@@ -25,6 +25,13 @@ public:
 	void Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
 private:
+
+	struct Transform {
+		Vector3 scale;
+		Vector3 rotate;
+		Vector3 translate;
+	};
+
 	struct VertexData {
 		Vector4 position;
 		Vector2 texcoord;
@@ -91,5 +98,37 @@ private:
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	D3D12_INDEX_BUFFER_VIEW indexbufferView;
+
+private:
+
+	Vector2 position = {0.0f, 0.0f};
+	float rotation = 0.0f;
+	Vector2 scale = {0.0f, 0.0f};
+	Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
+
+public:
+	// Getter(Position)
+	const Vector2& GetPosition() const { return position; }
+	// Getter(Rotation)
+	const float& GetRotation() const { return rotation; }
+	// Getter(Scale)
+	const Vector2& GetScale() const { return scale; }
+	// Getter(Color)
+	const Vector4& GetColor() const { return materialData->color; }
+
+	// Setter(Position)
+	void SetPosition(const Vector2& pos) { position = pos; }
+	// Setter(Rotation)
+	void SetRotatioin(const float& rotate) { rotation = rotate; }
+	// Setter(Scale)
+	void SetScale(const Vector2& size) { scale = size; }
+	// Setter(Color)
+	void SetColor(const Vector4& color) { materialData->color = color; }
+
+	//void SetTransform(Transform transform);
+	//void SetMaterial(Material* material);
+	// 
+	// 初期化時などの一度に変更したい場合に
+	void SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color);
 
 };

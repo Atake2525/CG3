@@ -24,6 +24,7 @@ Vector3 operator+(Vector3 v1, const Vector3& v2) {
 }
 
 
+
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4() {
 	Matrix4x4 ans = { 0 };
