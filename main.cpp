@@ -26,6 +26,7 @@
 #include "DirectXBase.h"
 #include "SpriteBase.h"
 #include "Sprite.h"
+#include "TextureManager.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"
@@ -245,10 +246,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteBase = new SpriteBase();
 	spriteBase->Initialize(directxBase);
 
+	TextureManager::GetInstance()->Initialize(directxBase);
+	TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
+	TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
 	Sprite* sprite = nullptr;
 	sprite = new Sprite();
-	sprite->Initialize(spriteBase);
-	sprite->SetScale(Vector2{200.0f, 200.0f});
+	sprite->Initialize(spriteBase, "Resources/uvChecker.png");
+	//sprite->SetScale(Vector2{200.0f, 200.0f});
+
+	uint32_t textureIndexSphere = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/monsterBall.png");
+	uint32_t textureIndexUv = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/uvChecker.png");
 
 	Input* input = nullptr;
 	input = new Input();
@@ -411,7 +418,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// モデル読み込み
 	ModelData modelDataTerrain = LoadObjFile("Resources", "terrain.obj");
 	//DirectX::ScratchImage mipImages2 = directxBase->LoadTexture(modelDataTerrain.material.textureFilePath);
-
+	TextureManager::GetInstance()->LoadTexture(modelDataTerrain.material.textureFilePath);
+	uint32_t textureIndexModel = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelDataTerrain.material.textureFilePath);
 	 // 頂点リソースの作成
 	 ComPtr<ID3D12Resource> vertexResourceTerrain = directxBase->CreateBufferResource(sizeof(VertexData) * modelDataTerrain.vertices.size());
 	 // 頂点バッファビューを作成する
@@ -634,64 +642,64 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 
 	// Textureを読んで転送する
-	DirectX::ScratchImage mipImages = directxBase->LoadTexture("Resources/uvChecker.png");
-	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-	ComPtr<ID3D12Resource> textureResource = directxBase->CreateTextureResource(metadata);
-	directxBase->UploadTextureData(textureResource, mipImages);
+	//DirectX::ScratchImage mipImages = directxBase->LoadTexture("Resources/uvChecker.png");
+	//const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
+	//ComPtr<ID3D12Resource> textureResource = directxBase->CreateTextureResource(metadata);
+	//directxBase->UploadTextureData(textureResource, mipImages);
 
-	// 2枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages2 = directxBase->LoadTexture("Resources/monsterBall.png");
-	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
-	ComPtr<ID3D12Resource> textureResource2 = directxBase->CreateTextureResource(metadata2);
-	directxBase->UploadTextureData(textureResource2, mipImages2);
+	//// 2枚目のTextureを読んで転送する
+	//DirectX::ScratchImage mipImages2 = directxBase->LoadTexture("Resources/monsterBall.png");
+	//const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
+	//ComPtr<ID3D12Resource> textureResource2 = directxBase->CreateTextureResource(metadata2);
+	//directxBase->UploadTextureData(textureResource2, mipImages2);
 
-	// 3枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages3 = directxBase->LoadTexture(modelDataTerrain.material.textureFilePath);
-	const DirectX::TexMetadata& metadata3 = mipImages3.GetMetadata();
-	ComPtr<ID3D12Resource> textureResource3 = directxBase->CreateTextureResource(metadata3);
-	directxBase->UploadTextureData(textureResource3, mipImages3);
+	//// 3枚目のTextureを読んで転送する
+	//DirectX::ScratchImage mipImages3 = directxBase->LoadTexture(modelDataTerrain.material.textureFilePath);
+	//const DirectX::TexMetadata& metadata3 = mipImages3.GetMetadata();
+	//ComPtr<ID3D12Resource> textureResource3 = directxBase->CreateTextureResource(metadata3);
+	//directxBase->UploadTextureData(textureResource3, mipImages3);
 
-	
+	//
 
-	// ShaderResourceVieを作る
-	// metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
+	//// ShaderResourceVieを作る
+	//// metaDataを基にSRVの設定
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	//srvDesc.Format = metadata.format;
+	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	//srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
-	// metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metadata2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;// 2Dテクスチャ
-	srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
+	//// metaDataを基にSRVの設定
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
+	//srvDesc2.Format = metadata2.format;
+	//srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;// 2Dテクスチャ
+	//srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
 
-	// metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc3{};
-	srvDesc3.Format = metadata3.format;
-	srvDesc3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	srvDesc3.Texture2D.MipLevels = UINT(metadata3.mipLevels);
+	//// metaDataを基にSRVの設定
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc3{};
+	//srvDesc3.Format = metadata3.format;
+	//srvDesc3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//srvDesc3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	//srvDesc3.Texture2D.MipLevels = UINT(metadata3.mipLevels);
 
-	// SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = directxBase->GetSRVCPUDescriptorHandle(1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = directxBase->GetSRVGPUDescriptorHandle(1);
-	// SRVの作成
-	directxBase->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+	//// SRVを作成するDescriptorHeapの場所を決める
+	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = directxBase->GetSRVCPUDescriptorHandle(1);
+	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = directxBase->GetSRVGPUDescriptorHandle(1);
+	//// SRVの作成
+	//directxBase->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 
-	// SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = directxBase->GetSRVCPUDescriptorHandle(2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = directxBase->GetSRVGPUDescriptorHandle(2);
-	// SRVの生成
-	directxBase->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
+	//// SRVを作成するDescriptorHeapの場所を決める
+	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = directxBase->GetSRVCPUDescriptorHandle(2);
+	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = directxBase->GetSRVGPUDescriptorHandle(2);
+	//// SRVの生成
+	//directxBase->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
-	// SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU3 = directxBase->GetSRVCPUDescriptorHandle(3);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU3 = directxBase->GetSRVGPUDescriptorHandle(3);
-	// SRVの生成
-	directxBase->GetDevice()->CreateShaderResourceView(textureResource3.Get(), &srvDesc3, textureSrvHandleCPU3);
+	//// SRVを作成するDescriptorHeapの場所を決める
+	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU3 = directxBase->GetSRVCPUDescriptorHandle(3);
+	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU3 = directxBase->GetSRVGPUDescriptorHandle(3);
+	//// SRVの生成
+	//directxBase->GetDevice()->CreateShaderResourceView(textureResource3.Get(), &srvDesc3, textureSrvHandleCPU3);
 
 
 	///TransformationMatrix用のResourceを作る
@@ -742,6 +750,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float rotation = sprite->GetRotation();
 	Vector2 scale = sprite->GetScale();
 	Vector4 color = sprite->GetColor();
+	Vector2 anchorPoint = sprite->GetAnchorPoint();
+	bool isFlipX = sprite->GetIsFlipX();
+	bool isFlipY = sprite->GetIsFlipY();
+	Vector2 textureLeftTop = sprite->GetTextureLeftTop();
+	Vector2 textureSize = sprite->GetTextureSize();
+
 	//ゲームループ
 	/*MSG msg{};*/
 	//ウィンドウの×ボタンが押されるまでループ
@@ -817,6 +831,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("Scale", &scale.x, 1.0f);
 				ImGui::DragFloat("Rotate", &rotation, 0.01f);
 				ImGui::DragFloat2("Translate", &position.x, 1.0f);
+				ImGui::DragFloat2("AnchorPoint", &anchorPoint.x, 0.1f);
+				ImGui::Checkbox("FlipX", &isFlipX);
+				ImGui::Checkbox("FlipY", &isFlipY);
+				ImGui::DragFloat2("TextureLeftTop", &textureLeftTop.x, 0.1f);
+				ImGui::DragFloat2("TextureSize", &textureSize.x, 0.1f);
 				//ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 				//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
@@ -881,6 +900,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 			sprite->SetStatus(position, rotation, scale, color);
+			sprite->SetAnchorPoint(anchorPoint);
+			sprite->SetIsFlip(isFlipX, isFlipY);
+			sprite->SetTextureLeftTop(textureLeftTop);
+			sprite->SetTextureSize(textureSize);
 			sprite->Update();
 
 			directxBase->PreDraw();
@@ -924,7 +947,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// マテリアルCBufferの場所を設定
 			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-			directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
+			directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(
+			    2, useMonsterBall ? TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexSphere) : TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexUv));
 
 			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResource->GetGPUVirtualAddress());
 
@@ -942,7 +966,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// ModelTerrain
 			directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewTerrain); // VBVを設定
-			directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
+			directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexModel));
 			directxBase->GetCommandList()->DrawInstanced(UINT(modelDataTerrain.vertices.size()), 1, 0, 0);
 
 
@@ -958,7 +982,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 			//// 描画
 			//directxBase->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
-			sprite->Draw(textureSrvHandleGPU);
+			sprite->Draw();
 
 			 
 			// 実際のcommandListのImGuiの描画コマンドを積む
@@ -982,6 +1006,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete directxBase;
 
 	delete spriteBase;
+
+	TextureManager::GetInstance()->Finalize();
 
 	delete sprite;
 

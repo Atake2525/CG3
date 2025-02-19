@@ -40,6 +40,9 @@
     <Filter Include="BaseEngine">
       <UniqueIdentifier>{fab87c20-33cd-42e1-8180-62d6aa519162}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TextureManager">
+      <UniqueIdentifier>{8837f59e-c0a2-4eb3-83f7-97c03d1a996a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externels\imgui\imgui.cpp">
@@ -92,6 +95,9 @@
     </ClCompile>
     <ClCompile Include="D3DResourceLeakChecker.cpp">
       <Filter>LeakChecker</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>TextureManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="D3DResourceLeakChecker.h">
       <Filter>LeakChecker</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>TextureManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

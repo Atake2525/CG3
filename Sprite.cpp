@@ -1,6 +1,7 @@
 #include "Sprite.h"
 #include "SpriteBase.h"
 #include "DirectXBase.h"
+#include "TextureManager.h"
 
 //void Sprite::SetTransform(Transform transform){ 
 //	position.x = transform.translate.x;
@@ -22,7 +23,7 @@ void Sprite::SetStatus(const Vector2& position, const float& rotation, const Vec
 }
 
 
-void Sprite::Initialize(SpriteBase* spriteBase) { 
+void Sprite::Initialize(SpriteBase* spriteBase, std::string textureFilePath) { 
 	spriteBase_ = spriteBase;
 
 	// VertexResourceの作成
@@ -47,18 +48,48 @@ void Sprite::Initialize(SpriteBase* spriteBase) {
 	SetMaterial();
 	// TransformationMatrixBufferViewの作成
 	SetTransformatinMatrix();
+
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	AdjustTextureSize();
 }
 
 void Sprite::Update() {
-	// spriteの設定
-	vertexData[0].position = {0.0f, 0.0f, 0.0f, 1.0f}; // 左上
-	vertexData[0].texcoord = {0.0f, 0.0f};
-	vertexData[1].position = {1.0f, 0.0f, 0.0f, 1.0f}; // 右上
-	vertexData[1].texcoord = {1.0f, 0.0f};
-	vertexData[2].position = {1.0f, 1.0f, 0.0f, 1.0f}; // 右下
-	vertexData[2].texcoord = {1.0f, 1.0f};
-	vertexData[3].position = {0.0f, 1.0f, 0.0f, 1.0f}; // 左下
-	vertexData[3].texcoord = {0.0f, 1.0f};
+
+	// アンカーポイントの設定
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	// 左右上下フリップの設定
+
+	// 左右反転
+	if (isFlipX) {
+		left = -left;
+		right = -right;
+	}
+	// 上下反転
+	if (isFlipY) {
+		top = -top;
+		bottom = -bottom;
+	}
+
+	// テクスチャ範囲指定の設定
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	float tex_left = textureLeftTop.x / metadata.width;
+	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
+	float tex_top = textureLeftTop.y / metadata.height;
+	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
+
+	// sprite(頂点データ)の設定
+	vertexData[0].position = {left, top, 0.0f, 1.0f}; // 左上
+	vertexData[0].texcoord = {tex_left, tex_top};
+	vertexData[1].position = {right, top, 0.0f, 1.0f}; // 右上
+	vertexData[1].texcoord = {tex_right, tex_top};
+	vertexData[2].position = {right, bottom, 0.0f, 1.0f}; // 右下
+	vertexData[2].texcoord = {tex_right, tex_bottom};
+	vertexData[3].position = {left, bottom, 0.0f, 1.0f}; // 左下
+	vertexData[3].texcoord = {tex_left, tex_bottom};
 
 	indexData[0] = 0;
 	indexData[1] = 1;
@@ -101,7 +132,11 @@ void Sprite::Update() {
 	transformationMatrixData->World = worldMatrix;
 }
 
-void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
+void Sprite::ChangeTexture(std::string textureFilePath) { 
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+}
+
+void Sprite::Draw() {
 	// Spriteの描画。変更が必要なものだけ変更する
 	spriteBase_->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
@@ -111,7 +146,7 @@ void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixCBbufferの場所を設定
 	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
-	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
 	// 描画
 	spriteBase_->GetDxBase()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
@@ -160,4 +195,19 @@ void Sprite::SetTransformatinMatrix() {
 	// 単位行列を書き込んでおく
 	transformationMatrixData->WVP = MakeIdentity4x4();
 	transformationMatrixData->World = MakeIdentity4x4();
+}
+
+void Sprite::SetIsFlip(const bool& FlipX, const bool& FlipY) {
+	isFlipX = FlipX;
+	isFlipY = FlipY;
+}
+
+void Sprite::AdjustTextureSize() {
+	// テクスチャメタデータを取得
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+
+	textureSize.x = static_cast<float>(metadata.width);
+	textureSize.y = static_cast<float>(metadata.height);
+	// 画像サイズをテクスチャサイズに合わせる
+	scale = textureSize;
 }
