@@ -545,23 +545,23 @@ void DirectXBase::UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> textu
 	}
 }
 
-// Textureデータを読む
-DirectX::ScratchImage DirectXBase::LoadTexture(const std::string& filePath) {
-	// テクスチャファイルを読んでプログラムで扱えるようにする
-	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
-
-	// ミニマップの作成
-	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-
-	// ミニマップ付きデータを返す
-	return mipImages;
-
-	// MipMap(ミニマップ) : 元画像より小さなテクスチャ群
-}
+//// Textureデータを読む
+//DirectX::ScratchImage DirectXBase::LoadTexture(const std::string& filePath) {
+//	// テクスチャファイルを読んでプログラムで扱えるようにする
+//	DirectX::ScratchImage image{};
+//	std::wstring filePathW = ConvertString(filePath);
+//	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+//	assert(SUCCEEDED(hr));
+//
+//	// ミニマップの作成
+//	DirectX::ScratchImage mipImages{};
+//	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
+//
+//	// ミニマップ付きデータを返す
+//	return mipImages;
+//
+//	// MipMap(ミニマップ) : 元画像より小さなテクスチャ群
+//}
 
 void DirectXBase::InitializeFixFPS() {
 	// 現在時間を記録する

@@ -2,6 +2,7 @@
 #include <wrl.h>
 #include "WinApp.h"
 #include "kMath.h"
+#include <string>
 
 #pragma once
 
@@ -12,17 +13,22 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(SpriteBase* spriteBase);
+	void Initialize(SpriteBase* spriteBase, std::string textureFilePath);
 
 	/// <summary>
 	/// 更新
 	/// </summary>
 	void Update();
+
+	/// <summary>
+	/// テクスチャ変更
+	/// </summary>
+	void ChangeTexture(std::string textureFilePath);
 	
 	/// <summary>
 	/// 描画
 	/// </summary>
-	void Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Draw();
 
 private:
 
@@ -101,10 +107,19 @@ private:
 
 private:
 
+	// 位置
 	Vector2 position = {0.0f, 0.0f};
+	// 回転
 	float rotation = 0.0f;
+	// 拡縮
 	Vector2 scale = {0.0f, 0.0f};
+	// 色(RGBA)
 	Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
+	// 回転の原点
+	Vector2 anchorPoint = {0.0f, 0.0f};
+
+	// テクスチャ番号
+	uint32_t textureIndex = 0;
 
 public:
 	// Getter(Position)
@@ -115,6 +130,8 @@ public:
 	const Vector2& GetScale() const { return scale; }
 	// Getter(Color)
 	const Vector4& GetColor() const { return materialData->color; }
+	// Getter(AnchorPoint)
+	const Vector2& GetAnchorPoint() const { return anchorPoint; }
 
 	// Setter(Position)
 	void SetPosition(const Vector2& pos) { position = pos; }
@@ -124,6 +141,8 @@ public:
 	void SetScale(const Vector2& size) { scale = size; }
 	// Setter(Color)
 	void SetColor(const Vector4& color) { materialData->color = color; }
+	// Setter(AnchorPoint)
+	void SetAnchorPoint(const Vector2& anchPoint) { anchorPoint = anchPoint; }
 
 	//void SetTransform(Transform transform);
 	//void SetMaterial(Material* material);

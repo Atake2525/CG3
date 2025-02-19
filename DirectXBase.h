@@ -68,8 +68,6 @@ public:
 
 	void UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
-	// Textureデータを読む
-	DirectX::ScratchImage LoadTexture(const std::string& filePath);
 private:
 
 

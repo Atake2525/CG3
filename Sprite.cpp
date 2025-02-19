@@ -1,6 +1,7 @@
 #include "Sprite.h"
 #include "SpriteBase.h"
 #include "DirectXBase.h"
+#include "TextureManager.h"
 
 //void Sprite::SetTransform(Transform transform){ 
 //	position.x = transform.translate.x;
@@ -22,7 +23,7 @@ void Sprite::SetStatus(const Vector2& position, const float& rotation, const Vec
 }
 
 
-void Sprite::Initialize(SpriteBase* spriteBase) { 
+void Sprite::Initialize(SpriteBase* spriteBase, std::string textureFilePath) { 
 	spriteBase_ = spriteBase;
 
 	// VertexResourceの作成
@@ -47,17 +48,26 @@ void Sprite::Initialize(SpriteBase* spriteBase) {
 	SetMaterial();
 	// TransformationMatrixBufferViewの作成
 	SetTransformatinMatrix();
+
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 }
 
 void Sprite::Update() {
+
+	// アンカーポイントの設定
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
 	// spriteの設定
-	vertexData[0].position = {0.0f, 0.0f, 0.0f, 1.0f}; // 左上
+	vertexData[0].position = {left, top, 0.0f, 1.0f}; // 左上
 	vertexData[0].texcoord = {0.0f, 0.0f};
-	vertexData[1].position = {1.0f, 0.0f, 0.0f, 1.0f}; // 右上
+	vertexData[1].position = {right, top, 0.0f, 1.0f}; // 右上
 	vertexData[1].texcoord = {1.0f, 0.0f};
-	vertexData[2].position = {1.0f, 1.0f, 0.0f, 1.0f}; // 右下
+	vertexData[2].position = {right, bottom, 0.0f, 1.0f}; // 右下
 	vertexData[2].texcoord = {1.0f, 1.0f};
-	vertexData[3].position = {0.0f, 1.0f, 0.0f, 1.0f}; // 左下
+	vertexData[3].position = {left, bottom, 0.0f, 1.0f}; // 左下
 	vertexData[3].texcoord = {0.0f, 1.0f};
 
 	indexData[0] = 0;
@@ -101,7 +111,11 @@ void Sprite::Update() {
 	transformationMatrixData->World = worldMatrix;
 }
 
-void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
+void Sprite::ChangeTexture(std::string textureFilePath) { 
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+}
+
+void Sprite::Draw() {
 	// Spriteの描画。変更が必要なものだけ変更する
 	spriteBase_->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
@@ -111,7 +125,7 @@ void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU) {
 	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixCBbufferの場所を設定
 	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
-	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
 	// 描画
 	spriteBase_->GetDxBase()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
