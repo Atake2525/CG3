@@ -76,6 +76,8 @@ private:
 	// TransformationMatrixの値を設定
 	void SetTransformatinMatrix();
 
+	// テクスチャサイズを死めーじに合わせる
+	void AdjustTextureSize();
 
 private:
 	SpriteBase* spriteBase_ = nullptr;
@@ -117,6 +119,14 @@ private:
 	Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	// 回転の原点
 	Vector2 anchorPoint = {0.0f, 0.0f};
+	// 左右フリップ
+	bool isFlipX = false;
+	// 上下フリップ
+	bool isFlipY = false;
+	// テクスチャ左上座標
+	Vector2 textureLeftTop = {0.0f, 0.0f};
+	// テクスチャ切り出しサイズ
+	Vector2 textureSize = {100.0f, 100.0f};
 
 	// テクスチャ番号
 	uint32_t textureIndex = 0;
@@ -132,6 +142,14 @@ public:
 	const Vector4& GetColor() const { return materialData->color; }
 	// Getter(AnchorPoint)
 	const Vector2& GetAnchorPoint() const { return anchorPoint; }
+	// Getter(FlipX)
+	const bool& GetIsFlipX() const { return isFlipX; }
+	// Getter(FlipY)
+	const bool& GetIsFlipY() const { return isFlipY; }
+	// Getter(TextureLeftTop)
+	const Vector2& GetTextureLeftTop() const { return textureLeftTop; }
+	// Getter(TextureSize)
+	const Vector2& GetTextureSize() const { return textureSize; }
 
 	// Setter(Position)
 	void SetPosition(const Vector2& pos) { position = pos; }
@@ -143,6 +161,16 @@ public:
 	void SetColor(const Vector4& color) { materialData->color = color; }
 	// Setter(AnchorPoint)
 	void SetAnchorPoint(const Vector2& anchPoint) { anchorPoint = anchPoint; }
+	// Setter(FlipX)
+	void SetIsFlipX(const bool& FlipX) { isFlipX = FlipX; }
+	// Setter(FlipY)
+	void SetIsFlipY(const bool& FlipY) { isFlipY = FlipY; }
+	// Setter(FlipXY)
+	void SetIsFlip(const bool& FlipX, const bool& FlipY);
+	// Setter(TextureLeftTop)
+	void SetTextureLeftTop(const Vector2& LeftTop) { textureLeftTop = LeftTop; }
+	// Setter(TextureSize)
+	void SetTextureSize(const Vector2& size) { textureSize = size; }
 
 	//void SetTransform(Transform transform);
 	//void SetMaterial(Material* material);

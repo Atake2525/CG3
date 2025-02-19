@@ -252,7 +252,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* sprite = nullptr;
 	sprite = new Sprite();
 	sprite->Initialize(spriteBase, "Resources/uvChecker.png");
-	sprite->SetScale(Vector2{200.0f, 200.0f});
+	//sprite->SetScale(Vector2{200.0f, 200.0f});
+
+	uint32_t textureIndexSphere = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/monsterBall.png");
+	uint32_t textureIndexUv = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/uvChecker.png");
 
 	Input* input = nullptr;
 	input = new Input();
@@ -416,6 +419,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelData modelDataTerrain = LoadObjFile("Resources", "terrain.obj");
 	//DirectX::ScratchImage mipImages2 = directxBase->LoadTexture(modelDataTerrain.material.textureFilePath);
 	TextureManager::GetInstance()->LoadTexture(modelDataTerrain.material.textureFilePath);
+	uint32_t textureIndexModel = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelDataTerrain.material.textureFilePath);
 	 // 頂点リソースの作成
 	 ComPtr<ID3D12Resource> vertexResourceTerrain = directxBase->CreateBufferResource(sizeof(VertexData) * modelDataTerrain.vertices.size());
 	 // 頂点バッファビューを作成する
@@ -747,6 +751,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector2 scale = sprite->GetScale();
 	Vector4 color = sprite->GetColor();
 	Vector2 anchorPoint = sprite->GetAnchorPoint();
+	bool isFlipX = sprite->GetIsFlipX();
+	bool isFlipY = sprite->GetIsFlipY();
+	Vector2 textureLeftTop = sprite->GetTextureLeftTop();
+	Vector2 textureSize = sprite->GetTextureSize();
 
 	//ゲームループ
 	/*MSG msg{};*/
@@ -823,6 +831,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat2("Scale", &scale.x, 1.0f);
 				ImGui::DragFloat("Rotate", &rotation, 0.01f);
 				ImGui::DragFloat2("Translate", &position.x, 1.0f);
+				ImGui::DragFloat2("AnchorPoint", &anchorPoint.x, 0.1f);
+				ImGui::Checkbox("FlipX", &isFlipX);
+				ImGui::Checkbox("FlipY", &isFlipY);
+				ImGui::DragFloat2("TextureLeftTop", &textureLeftTop.x, 0.1f);
+				ImGui::DragFloat2("TextureSize", &textureSize.x, 0.1f);
 				//ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 				//ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				//ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
@@ -887,6 +900,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 			sprite->SetStatus(position, rotation, scale, color);
+			sprite->SetAnchorPoint(anchorPoint);
+			sprite->SetIsFlip(isFlipX, isFlipY);
+			sprite->SetTextureLeftTop(textureLeftTop);
+			sprite->SetTextureSize(textureSize);
 			sprite->Update();
 
 			directxBase->PreDraw();
@@ -926,30 +943,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//directxBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			spriteBase->ShaderDraw();
 
-			//directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere); // VBVを設定
-			//// マテリアルCBufferの場所を設定
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-			//// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-			//directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
+			directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere); // VBVを設定
+			// マテリアルCBufferの場所を設定
+			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
+			directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(
+			    2, useMonsterBall ? TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexSphere) : TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexUv));
 
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResource->GetGPUVirtualAddress());
+			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResource->GetGPUVirtualAddress());
 
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
+			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
-			//// wvp用のCBufferの場所を設定
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-			//// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後(球)
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
-			//directxBase->GetCommandList()->DrawInstanced(kVertexCount, 1, 0, 0);
+			// wvp用のCBufferの場所を設定
+			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			// 描画！(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後(球)
+			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+			directxBase->GetCommandList()->DrawInstanced(kVertexCount, 1, 0, 0);
 
-			//// 描画！(DrawCall/ドローコール) 6個のインデックスを使用し一つのインスタンスを描画。その他は当面0で良い
+			// 描画！(DrawCall/ドローコール) 6個のインデックスを使用し一つのインスタンスを描画。その他は当面0で良い
 
-			//// ModelTerrain
-			//directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewTerrain); // VBVを設定
-			//directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-			//directxBase->GetCommandList()->DrawInstanced(UINT(modelDataTerrain.vertices.size()), 1, 0, 0);
+			// ModelTerrain
+			directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewTerrain); // VBVを設定
+			directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexModel));
+			directxBase->GetCommandList()->DrawInstanced(UINT(modelDataTerrain.vertices.size()), 1, 0, 0);
 
 
 			////Spriteの描画。変更が必要なものだけ変更する
