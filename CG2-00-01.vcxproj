@@ -103,6 +103,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kMath.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelBase.cpp" />
+    <ClCompile Include="Object3d.cpp" />
+    <ClCompile Include="Object3dBase.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="SpriteBase.cpp" />
     <ClCompile Include="StringUtility.cpp" />
@@ -124,6 +128,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kMath.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelBase.h" />
+    <ClInclude Include="Object3d.h" />
+    <ClInclude Include="Object3dBase.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteBase.h" />
     <ClInclude Include="StringUtility.h" />

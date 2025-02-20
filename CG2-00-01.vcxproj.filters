@@ -43,6 +43,12 @@
     <Filter Include="TextureManager">
       <UniqueIdentifier>{8837f59e-c0a2-4eb3-83f7-97c03d1a996a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object3d">
+      <UniqueIdentifier>{4af9ab07-e6dc-4be7-a7f4-dbb2166cd6e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{c92182b0-2a45-48d3-b2b1-31e35cb8e71c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externels\imgui\imgui.cpp">
@@ -98,6 +104,18 @@
     </ClCompile>
     <ClCompile Include="TextureManager.cpp">
       <Filter>TextureManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Object3dBase.cpp">
+      <Filter>Object3d</Filter>
+    </ClCompile>
+    <ClCompile Include="Object3d.cpp">
+      <Filter>Object3d</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelBase.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +187,18 @@
     </ClInclude>
     <ClInclude Include="TextureManager.h">
       <Filter>TextureManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Object3d.h">
+      <Filter>Object3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Object3dBase.h">
+      <Filter>Object3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelBase.h">
+      <Filter>Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
