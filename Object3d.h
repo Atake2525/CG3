@@ -6,6 +6,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix4x4.h"
+#include "Transform.h"
 
 #pragma once
 
@@ -18,7 +19,7 @@ public: // メンバ関数
 	void Initialize(Object3dBase* object3dBase);
 	
 	// 更新
-	void Update(Vector3& cameraTranslate, Vector3& cameraRotate);
+	void Update(Transform& camera);
 
 	/// <summary>
 	/// 描画
@@ -28,13 +29,9 @@ public: // メンバ関数
 
 	void SetModel(Model* model) { model_ = model; }
 
-private:
+	void SetDirectionalLight(DirectionalLight* LightData);
 
-	struct Transform {
-		Vector3 scale;
-		Vector3 rotate;
-		Vector3 translate;
-	};
+private:
 
 	Transform transform;
 	Transform cameraTransform;
@@ -50,31 +47,31 @@ private:
 		Matrix4x4 World;
 	};
 
-	struct DirectionalLight {
-		Vector4 color;     //!< ライトの色
-		Vector3 direction; //!< ライトの向き
-		float intensity;   //!< 輝度
-	};
+	//struct DirectionalLight {
+	//	Vector4 color;     //!< ライトの色
+	//	Vector3 direction; //!< ライトの向き
+	//	float intensity;   //!< 輝度
+	//};
 
-	struct PointLight {
-		Vector4 color;    //!< ライトの色
-		Vector3 position; //!< ライトの位置
-		float intensity;  //!< 輝度
-		float radius;     //!< ライトの届く最大距離
-		float dacay;      //!< 減衰率
-	};
+	//struct PointLight {
+	//	Vector4 color;    //!< ライトの色
+	//	Vector3 position; //!< ライトの位置
+	//	float intensity;  //!< 輝度
+	//	float radius;     //!< ライトの届く最大距離
+	//	float dacay;      //!< 減衰率
+	//};
 
-	struct SpotLight {
-		Vector4 color;         //!< ライトの色
-		Vector3 position;      //!< ライトの位置
-		float intensity;       //!< 輝度
-		Vector3 direction;     //!< ライトの向き
-		float distance;        //!< ライトの届く最大距離
-		float dacay;           //!< 減衰率
-		float cosAngle;        //!< スポットライトの余弦
-		float cosFalloffStart; // falloffが開始される角度
-		float padding[2];
-	};
+	//struct SpotLight {
+	//	Vector4 color;         //!< ライトの色
+	//	Vector3 position;      //!< ライトの位置
+	//	float intensity;       //!< 輝度
+	//	Vector3 direction;     //!< ライトの向き
+	//	float distance;        //!< ライトの届く最大距離
+	//	float dacay;           //!< 減衰率
+	//	float cosAngle;        //!< スポットライトの余弦
+	//	float cosFalloffStart; // falloffが開始される角度
+	//	float padding[2];
+	//};
 
 	// 座標変換リソースのバッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;

@@ -46,6 +46,8 @@ public:
 	// 更新
 	void Draw();
 
+	void SetIA();
+
 private:
 
 	ModelBase* modelBase_;

@@ -85,11 +85,11 @@ void Object3d::Initialize(Object3dBase* object3dBase) {
 	cameraData->worldPosition = cameraTransform.translate;
 }
 
-void Object3d::Update(Vector3& cameraTranslate, Vector3& cameraRotate) {
+void Object3d::Update(Transform& camera) {
 
-	cameraTransform.translate = cameraTranslate;
-	cameraTransform.rotate = cameraRotate;
+	cameraTransform = camera;
 
+	//directionalLightData->intensity -= 0.01f;
 
 	// 3DのTransform処理
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
@@ -109,6 +109,10 @@ void Object3d::Draw() {
 	//object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
 	//object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));
+
+	if (model_) {
+		model_->SetIA();
+	}
 
 	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResource->GetGPUVirtualAddress());
 
@@ -267,4 +271,8 @@ void Object3d::CreateSpotLightResource() {
 
 void Object3d::CreateCameraResource() { 
 	cameraResource = object3dBase_->GetDxBase()->CreateBufferResource(sizeof(CameraForGPU));
+}
+
+void Object3d::SetDirectionalLight(DirectionalLight* lightData) {
+	directionalLightData = lightData;
 }

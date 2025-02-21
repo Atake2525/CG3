@@ -31,7 +31,7 @@ void Model::Initialize(ModelBase* modelBase, std::string filename) {
 	materialData->uvTransform = MakeIdentity4x4();
 	// materialDataSprite->uvTransform = MakeIdentity4x4();
 
-	materialData->enableLighting = false;
+	materialData->enableLighting = true;
 	materialData->shininess = 70.0f;
 	materialData->specularColor = {1.0f, 1.0f, 1.0f};
 
@@ -41,9 +41,12 @@ void Model::Initialize(ModelBase* modelBase, std::string filename) {
 	modelData.material.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData.material.textureFilePath);
 }
 
-void Model::Draw() {
+void Model::SetIA() {
 	// ModelTerrain
 	modelBase_->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+}
+
+void Model::Draw() {
 
 	// wvp用のCBufferの場所を設定
 	modelBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());

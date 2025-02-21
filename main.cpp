@@ -31,6 +31,7 @@
 #include "Object3d.h"
 #include "ModelBase.h"
 #include "Model.h"
+#include "Transform.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"
@@ -58,12 +59,6 @@ struct CameraForGPU {
 //	float shininess;
 //	Vector3 specularColor;
 //};
-
-struct Transform {
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
-};
 
 struct TransformationMatrix {
 	Matrix4x4 WVP;
@@ -102,31 +97,31 @@ struct Emitter {
 	float frequencyTime; //!< 頻度用時刻
 };
 
-struct DirectionalLight {
-	Vector4 color; //!< ライトの色
-	Vector3 direction; //!< ライトの向き
-	float intensity; //!< 輝度
-};
-
-struct PointLight {
-	Vector4 color; //!< ライトの色
-	Vector3 position; //!< ライトの位置
-	float intensity; //!< 輝度
-	float radius; //!< ライトの届く最大距離
-	float dacay; //!< 減衰率
-};
-
-struct SpotLight {
-	Vector4 color;//!< ライトの色
-	Vector3 position;//!< ライトの位置
-	float intensity;//!< 輝度
-	Vector3 direction;//!< ライトの向き
-	float distance; //!< ライトの届く最大距離
-	float dacay; //!< 減衰率
-	float cosAngle; //!< スポットライトの余弦
-	float cosFalloffStart; // falloffが開始される角度
-	float padding[2];
-};
+//struct DirectionalLight {
+//	Vector4 color; //!< ライトの色
+//	Vector3 direction; //!< ライトの向き
+//	float intensity; //!< 輝度
+//};
+//
+//struct PointLight {
+//	Vector4 color; //!< ライトの色
+//	Vector3 position; //!< ライトの位置
+//	float intensity; //!< 輝度
+//	float radius; //!< ライトの届く最大距離
+//	float dacay; //!< 減衰率
+//};
+//
+//struct SpotLight {
+//	Vector4 color;//!< ライトの色
+//	Vector3 position;//!< ライトの位置
+//	float intensity;//!< 輝度
+//	Vector3 direction;//!< ライトの向き
+//	float distance; //!< ライトの届く最大距離
+//	float dacay; //!< 減衰率
+//	float cosAngle; //!< スポットライトの余弦
+//	float cosFalloffStart; // falloffが開始される角度
+//	float padding[2];
+//};
 
 //MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
 //	// 1, 中で必要となる変数の宣言
@@ -343,7 +338,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	directionalLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
 	directionalLightData->direction = {0.0f, -1.0f, 0.0f};
-	directionalLightData->intensity = 0.0f;
+	directionalLightData->intensity = 1.0f;
 
 	ComPtr<ID3D12Resource> pointLightResource = directxBase->CreateBufferResource(sizeof(PointLight));
 
@@ -365,7 +360,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spotLightData->position = {2.0f, 1.25f, 0.0f};
 	spotLightData->distance = 7.0f;
 	spotLightData->direction = Normalize({-1.0f, -1.0f, 0.0f});
-	spotLightData->intensity = 4.0f;
+	spotLightData->intensity = 0.0f;
 	spotLightData->dacay = 2.0f;
 	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);
 	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 2.6f);
@@ -641,7 +636,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	// Transform変数を作る
-	Transform transform{ {1.0f, 1.0f, 1.0f}, {0.0f, -1.58f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	Transform transform{
+	    {1.0f, 1.0f,   1.0f},
+        {0.0f, -1.58f, 0.0f},
+        {0.0f, 0.0f,   0.0f}
+    };
 
 	Transform cameraTransform{ {1.0f, 1.0f, 1.0f}, { 0.36f, 0.0f, 0.0f}, {0.0f, 6.0f, -19.0f} };
 
@@ -772,7 +771,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				//ImGui::ColorEdit3("SpecularColor", &materialData->specularColor.x);
 				if (ImGui::TreeNode("DirectionalLight")) {
 					ImGui::ColorEdit4("Color", &directionalLightData->color.x);
-					ImGui::SliderFloat3("Direction", &directionalLightData->direction.x, -2.0f, 2.0f);
+					ImGui::SliderFloat3("Direction", &directionalLightData->direction.x, -5.0f, 5.0f);
 					ImGui::DragFloat("Insensity", &directionalLightData->intensity, 1.0f);
 					ImGui::TreePop();
 				}
@@ -830,7 +829,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->SetTextureSize(textureSize);
 			sprite->Update();
 
-			object3d->Update(cameraTransform.translate, cameraTransform.rotate);
+			//object3d->SetDirectionalLight(directionalLightData);
+			object3d->Update(cameraTransform);
 
 			directxBase->PreDraw();
 
