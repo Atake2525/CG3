@@ -2,6 +2,7 @@
 #include <wrl.h>
 #include "WinApp.h"
 #include "kMath.h"
+#include "Transform.h"
 #include <string>
 
 #pragma once
@@ -31,12 +32,6 @@ public:
 	void Draw();
 
 private:
-
-	struct Transform {
-		Vector3 scale;
-		Vector3 rotate;
-		Vector3 translate;
-	};
 
 	struct VertexData {
 		Vector4 position;
