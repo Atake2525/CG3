@@ -25,11 +25,15 @@ public: // メンバ関数
 	/// 描画
 	/// </summary>
 	/// <param name="worldPos">CameraPosition</param>
-	void Draw();
+	void Draw(Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource, Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource);
 
-	void SetModel(Model* model) { model_ = model; }
+	void SetModel(const std::string& filePath);
 
-	void SetDirectionalLight(DirectionalLight* LightData);
+	void SetDirectionalLight(DirectionalLight* lightData);
+
+	void SetPointLight(PointLight* lightData);
+
+	void SetSpotLight(SpotLight* lightData);
 
 private:
 
@@ -102,6 +106,13 @@ private:
 	Model* model_ = nullptr;
 
 private:
+	Transform objectTransform;
+
+
+
+public:
+
+private:
 
 	// TransformationMatrixResourceを作る
 	void CreateTransformationMatrixResrouce();
@@ -115,6 +126,4 @@ private:
 	void CreateSpotLightResource();
 	// CameraResourceを作る
 	void CreateCameraResource();
-
-	
 };

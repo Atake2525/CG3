@@ -41,7 +41,7 @@ class Model {
 public:
 
 	// 初期化
-	void Initialize(ModelBase* modelBase, std::string filename);
+	void Initialize(ModelBase* modelBase, std::string directoryPath , std::string filename);
 	
 	// 更新
 	void Draw();

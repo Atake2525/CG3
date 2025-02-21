@@ -5,6 +5,7 @@
 #include "kMath.h"
 #include "WinApp.h"
 #include "Model.h"
+#include "ModelManager.h"
 #include <fstream>
 #include <sstream>
 #include <cassert>
@@ -49,7 +50,7 @@ void Object3d::Initialize(Object3dBase* object3dBase) {
 	// 平行光源にデータを書き込む
 	directionalLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
 	directionalLightData->direction = {0.0f, -1.0f, 0.0f};
-	directionalLightData->intensity = 1.0f;
+	directionalLightData->intensity = 0.0f;
 
 	// 点光源にデータを書き込む
 	pointLightData->color = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -101,7 +102,7 @@ void Object3d::Update(Transform& camera) {
 	transformationMatrix->World = worldMatrix;
 }
 
-void Object3d::Draw() {
+void Object3d::Draw(Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResourced, Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResourced) {
 	//// ModelTerrain
 	//object3dBase_->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
@@ -114,9 +115,9 @@ void Object3d::Draw() {
 		model_->SetIA();
 	}
 
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResource->GetGPUVirtualAddress());
+	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResourced->GetGPUVirtualAddress());
 
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResourced->GetGPUVirtualAddress());
 
 	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
@@ -275,4 +276,17 @@ void Object3d::CreateCameraResource() {
 
 void Object3d::SetDirectionalLight(DirectionalLight* lightData) {
 	directionalLightData = lightData;
+}
+
+void Object3d::SetPointLight(PointLight* lightData) { 
+	pointLightData = lightData;
+}
+
+void Object3d::SetSpotLight(SpotLight* lightData) { 
+	spotLightData = lightData; 
+}
+
+void Object3d::SetModel(const std::string& filePath) {
+	// モデルを検索してセットする
+	model_ = ModelManager::GetInstance()->FindModel(filePath);
 }

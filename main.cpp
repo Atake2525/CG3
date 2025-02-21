@@ -31,6 +31,7 @@
 #include "Object3d.h"
 #include "ModelBase.h"
 #include "Model.h"
+#include "ModelManager.h"
 #include "Transform.h"
 
 #include "algorithm"
@@ -257,6 +258,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	TextureManager::GetInstance()->Initialize(directxBase);
 
+	ModelManager::GetInstance()->Initialize(directxBase);
+
 #pragma endregion 基盤システムの初期化
 
 	TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
@@ -269,15 +272,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	uint32_t textureIndexSphere = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/monsterBall.png");
 	uint32_t textureIndexUv = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/uvChecker.png");
 
+	ModelManager::GetInstance()->LoadModel("Resources", "terrain.obj");
+	ModelManager::GetInstance()->LoadModel("Resources", "axis.obj");
+
 	Object3d* object3d = nullptr;
 	object3d = new Object3d();
 	object3d->Initialize(object3dBase);
 
-	Model* model = nullptr;
-	model = new Model();
-	model->Initialize(modelBase, "terrain.obj");
-
-	object3d->SetModel(model);
+	object3d->SetModel("terrain.obj");
 
 	Input* input = nullptr;
 	input = new Input();
@@ -829,7 +831,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->SetTextureSize(textureSize);
 			sprite->Update();
 
-			//object3d->SetDirectionalLight(directionalLightData);
+			object3d->SetDirectionalLight(directionalLightData);
+			object3d->SetPointLight(pointLightData);
+			object3d->SetSpotLight(spotLightData);
 			object3d->Update(cameraTransform);
 
 			directxBase->PreDraw();
@@ -911,7 +915,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			object3dBase->ShaderDraw();
 
-			object3d->Draw();
+			object3d->Draw(directionalLightResource, pointLightResource);
 
 			 
 			// 実際のcommandListのImGuiの描画コマンドを積む
@@ -942,11 +946,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	TextureManager::GetInstance()->Finalize();
 
+	ModelManager::GetInstance()->Finalize();
+
 	delete sprite;
 
 	delete object3d;
-
-	delete model;
 
 	delete input;
 

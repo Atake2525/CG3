@@ -4,10 +4,10 @@
 #include "kMath.h"
 #include "TextureManager.h"
 
-void Model::Initialize(ModelBase* modelBase, std::string filename) {
+void Model::Initialize(ModelBase* modelBase, std::string directoryPath, std::string filename) {
 	modelBase_ = modelBase;
 	// モデル読み込み
-	modelData = LoadObjFile("Resources", filename);
+	modelData = LoadObjFile(directoryPath, filename);
 
 	// Resourceの作成
 	CreateVertexResource();
@@ -31,7 +31,7 @@ void Model::Initialize(ModelBase* modelBase, std::string filename) {
 	materialData->uvTransform = MakeIdentity4x4();
 	// materialDataSprite->uvTransform = MakeIdentity4x4();
 
-	materialData->enableLighting = true;
+	materialData->enableLighting = false;
 	materialData->shininess = 70.0f;
 	materialData->specularColor = {1.0f, 1.0f, 1.0f};
 
