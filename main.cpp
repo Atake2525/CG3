@@ -126,12 +126,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	ModelManager::GetInstance()->LoadModel("Resources", "terrain.obj");
 	ModelManager::GetInstance()->LoadModel("Resources", "axis.obj");
+	ModelManager::GetInstance()->LoadModel("Resources", "bunny.obj");
+	ModelManager::GetInstance()->LoadModel("Resources", "teapot.obj");
 
 	Object3d* object3d = nullptr;
 	object3d = new Object3d();
 	object3d->Initialize(object3dBase);
 
-	object3d->SetModel("terrain.obj");
+	object3d->SetModel("teapot.obj");
 
 	Input* input = nullptr;
 	input = new Input();
@@ -485,6 +487,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector2 textureSize = sprite->GetTextureSize();
 
 	Transform modelTransform = object3d->GetTransform();
+	modelTransform.rotate = object3d->GetRotateInDegree();
 	Vector4 modelColor = object3d->GetColor();
 	bool modelEnableLighting = object3d->GetEnableLighting();
 
@@ -560,7 +563,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			if (ImGui::TreeNode("ModelSTR")) {
 				ImGui::DragFloat3("Scale", &modelTransform.scale.x, 0.01f);
-				ImGui::DragFloat3("Rotate", &modelTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("Rotate", &modelTransform.rotate.x, 1.0f);
 				ImGui::DragFloat3("Translate", &modelTransform.translate.x, 0.01f);
 				ImGui::Checkbox("EnableLighting", &modelEnableLighting);
 				ImGui::TreePop();
@@ -647,6 +650,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3d->SetSpotLight(spotLightData);
 
 			object3d->SetTransform(modelTransform);
+			object3d->SetRotateInDegree(modelTransform.rotate);
 			object3d->SetColor(modelColor);
 			object3d->SetEnableLighting(modelEnableLighting);
 			object3d->Update(cameraTransform);

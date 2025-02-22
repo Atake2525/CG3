@@ -168,3 +168,11 @@ const bool& Object3d::GetEnableLighting() const {
 void Object3d::SetEnableLighting(const bool& enableLighting) { 
 	model_->SetEnableLighting(enableLighting);
 }
+
+const Vector3& Object3d::GetRotateInDegree() const { 
+	return SwapDegree(transform.rotate);
+}
+
+void Object3d::SetRotateInDegree(const Vector3& rotate) { 
+	transform.rotate = SpwapRadian(rotate);
+}

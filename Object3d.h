@@ -94,6 +94,8 @@ public:
 	const Vector3& GetScale() const { return transform.scale; }
 	// Getter(Rotate)
 	const Vector3& GetRotate() const { return transform.rotate; }
+	// Getter(Rotate Degree)
+	const Vector3& GetRotateInDegree() const;
 	// Gettre(Color)
 	const Vector4& GetColor() const;
 	// Getter(EnableLighting)
@@ -107,6 +109,8 @@ public:
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	// Setter(Rotate)
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
+	// Setter(Rotate Degree)
+	void SetRotateInDegree(const Vector3& rotate);
 	// Setter(Color)
 	void SetColor(const Vector4& color);
 	// Setter(EnableLighting)

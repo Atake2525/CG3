@@ -41,7 +41,7 @@ class Model {
 public:
 
 	// 初期化
-	void Initialize(ModelBase* modelBase, std::string directoryPath , std::string filename);
+	void Initialize(ModelBase* modelBase, std::string directoryPath, std::string filename, bool enableLighting);
 	
 	// 更新
 	void Draw();
@@ -56,7 +56,7 @@ public:
 	// Setter(Color)
 	void SetColor(const Vector4& color) { materialData->color = color; }
 	// Setter(EnableLighting)
-	void SetEnableLighting(const bool& enableLighting) { materialData->enableLighting; } 
+	void SetEnableLighting(const bool& enableLighting) { materialData->enableLighting = enableLighting; }
 
 private:
 
