@@ -49,6 +49,9 @@
     <Filter Include="Model">
       <UniqueIdentifier>{c92182b0-2a45-48d3-b2b1-31e35cb8e71c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{8280debf-7b2d-4f7b-8ad4-95d8d2007b74}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externels\imgui\imgui.cpp">
@@ -122,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="ModelManager.cpp">
       <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="ModelManager.h">
       <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

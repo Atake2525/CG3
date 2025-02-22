@@ -4,6 +4,7 @@
 #pragma once
 
 class DirectXBase;
+class Camera;
 
 class Object3dBase {
 public:
@@ -19,8 +20,16 @@ public:
 
 	DirectXBase* GetDxBase() const { return directxBase_; }
 
+	// Getter(Camera)
+	Camera* GetDefaultCamera() const { return defaultCamera; }
+
+	// Setter(Camera)
+	void SetDefaultCamera(Camera* camera) { defaultCamera = camera; }
+
 private:
 	DirectXBase* directxBase_ = nullptr;
+
+	Camera* defaultCamera = nullptr;
 
 private:
 	// ルートシグネチャの作成

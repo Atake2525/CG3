@@ -12,6 +12,7 @@
 
 class Object3dBase;
 class Model;
+class Camera;
 
 class Object3d {
 public: // メンバ関数
@@ -19,7 +20,7 @@ public: // メンバ関数
 	void Initialize(Object3dBase* object3dBase);
 	
 	// 更新
-	void Update(Transform& camera);
+	void Update();
 
 	/// <summary>
 	/// 描画
@@ -35,10 +36,13 @@ public: // メンバ関数
 
 	void SetSpotLight(SpotLight* lightData);
 
+	void SetCamera(Camera* camera) { this->camera = camera; }
+
 private:
 
 	Transform transform;
-	Transform cameraTransform;
+
+	Camera* camera = nullptr;
 
 private:
 
@@ -78,11 +82,6 @@ private:
 	Object3dBase* object3dBase_;
 
 	Model* model_ = nullptr;
-
-private:
-	
-
-
 
 public:
 
