@@ -23,15 +23,12 @@ void Model::Initialize(ModelBase* modelBase, std::string directoryPath, std::str
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
 	// データを書き込む
-	// materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
 	// 今回は赤を書き込んでみる
 	materialData->color = {1.0f, 1.0f, 1.0f, 1.0f};
-	// materialDataSprite->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	materialData->uvTransform = MakeIdentity4x4();
-	// materialDataSprite->uvTransform = MakeIdentity4x4();
 
-	materialData->enableLighting = false;
+	materialData->enableLighting = true;
 	materialData->shininess = 70.0f;
 	materialData->specularColor = {1.0f, 1.0f, 1.0f};
 
@@ -134,7 +131,7 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 				// VertexData vertex = { position, texcoord, normal };
 				// modelData.vertices.push_back(vertex);
 				position.x *= -1.0f;
-				position.y *= -1.0f;
+				//position.y *= -1.0f;
 				normal.x *= -1.0f;
 				texcoord.y = 1.0f - texcoord.y;
 

@@ -66,23 +66,6 @@ struct TransformationMatrix {
 	Matrix4x4 World;
 };
 
-//struct MaterialData
-//{
-//	std::string textureFilePath;
-//};
-
-//struct VertexData {
-//	Vector4 position;
-//	Vector2 texcoord;
-//	Vector3 normal;
-//};
-
-//struct ModelData
-//{
-//	std::vector<VertexData> vertices;
-//	MaterialData material;
-//};
-
 struct Particle {
 	Transform transform;
 	Vector3 velocity;
@@ -97,137 +80,6 @@ struct Emitter {
 	float frequency;     //!< 発生頻度
 	float frequencyTime; //!< 頻度用時刻
 };
-
-//struct DirectionalLight {
-//	Vector4 color; //!< ライトの色
-//	Vector3 direction; //!< ライトの向き
-//	float intensity; //!< 輝度
-//};
-//
-//struct PointLight {
-//	Vector4 color; //!< ライトの色
-//	Vector3 position; //!< ライトの位置
-//	float intensity; //!< 輝度
-//	float radius; //!< ライトの届く最大距離
-//	float dacay; //!< 減衰率
-//};
-//
-//struct SpotLight {
-//	Vector4 color;//!< ライトの色
-//	Vector3 position;//!< ライトの位置
-//	float intensity;//!< 輝度
-//	Vector3 direction;//!< ライトの向き
-//	float distance; //!< ライトの届く最大距離
-//	float dacay; //!< 減衰率
-//	float cosAngle; //!< スポットライトの余弦
-//	float cosFalloffStart; // falloffが開始される角度
-//	float padding[2];
-//};
-
-//MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
-//	// 1, 中で必要となる変数の宣言
-//	MaterialData materialData; // 構築するMaterialData
-//	std::string line; // ファイルから読んだ１行を格納するもの
-//	// 2, ファイルを開く
-//	std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
-//	assert(file.is_open()); // とりあえず開けなかったら止める
-//	// 3, 実際にファイルを読み、MaterialDataを構築していく
-//	while (std::getline(file, line)){
-//		std::string identifier;
-//		std::istringstream s(line);
-//		s >> identifier;
-//
-//		// identifierに応じた処理
-//		if (identifier == "map_Kd"){
-//			std::string textureFilename;
-//			s >> textureFilename;
-//			// 連結してファイルパスにする
-//			materialData.textureFilePath = directoryPath+"/"+textureFilename;
-//		}
-//	}
-//	// 4, MaterialDataを返す
-//	return materialData;
-//}
-//
-//ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename) {
-//	// 1. 中で必要となる変数の宣言
-//	ModelData modelData; // 構築するModelData
-//	std::vector<Vector4> positions; // 位置
-//	std::vector<Vector3> normals; // 法線
-//	std::vector<Vector2> texcoords; // テクスチャ座標
-//	std::string line; // ファイルから読んだ1行を格納するもの
-//
-//	// 2. ファイルを開く
-//	std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
-//	assert(file.is_open()); // とりあえず開けなかったら止める
-//	// 3. 実際にファイルを読み、ModelDataを構築していく
-//	while (std::getline(file, line))
-//	{
-//		std::string identifier;
-//		std::istringstream s(line);
-//		s >> identifier; // 先頭の識別子を読む
-//
-//		// identifierに応じた処理
-//		if (identifier == "v"){
-//			Vector4 position;
-//			s >> position.x >> position.y >> position.z;
-//			position.w = 1.0f;
-//			positions.push_back(position);
-//		}
-//		else if (identifier == "vt"){
-//			Vector2 texcoord;
-//			s >> texcoord.x >> texcoord.y;
-//			texcoords.push_back(texcoord);
-//		}
-//		else if (identifier == "vn"){
-//			Vector3 normal;
-//			s >> normal.x >> normal.y >> normal.z;
-//			normals.push_back(normal);
-//		}
-//		else if (identifier == "f"){
-//			VertexData triangle[3];
-//
-//			// 面は三角形限定。その他は未対応
-//			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex){
-//				std::string vertexDefinition;
-//				s >> vertexDefinition;
-//				// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してIndexを取得する
-//				std::istringstream v(vertexDefinition);
-//				uint32_t elementIndices[3];
-//				for (int32_t element = 0; element < 3; ++element){
-//					std::string index;
-//					std::getline(v, index, '/'); // /区切りでインデックスを読んでいく
-//					elementIndices[element] = std::stoi(index);
-//				}
-//				// 要素へのIndexから、実際の要素を値を取得して、頂点を構築する
-//				Vector4 position = positions[elementIndices[0] - 1];
-//				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-//				Vector3 normal = normals[elementIndices[2] - 1];
-//				//VertexData vertex = { position, texcoord, normal };
-//				//modelData.vertices.push_back(vertex);
-//				position.x *= -1.0f;
-//				normal.x *= -1.0f;
-//				texcoord.y = 1.0f - texcoord.y;
-//
-//				triangle[faceVertex] = {position, texcoord, normal};
-//			}
-//			// 頂点を逆順で登録することで、周り順を逆にする
-//			modelData.vertices.push_back(triangle[2]);
-//			modelData.vertices.push_back(triangle[1]);
-//			modelData.vertices.push_back(triangle[0]);
-//		}
-//		else if (identifier == "mtllib") {
-//			// materialTemplateLibraryファイルの名前を取得する
-//			std::string materialFilename;
-//			s >> materialFilename;
-//			// 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
-//			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
-//		}
-//	}
-//	// 4. ModelDataを返す
-//	return modelData;
-//}
-
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -438,25 +290,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	bool useMonsterBall = true;
 
-
-	// モデル読み込み
-	//ModelData modelDataTerrain = LoadObjFile("Resources", "terrain.obj");
-	//DirectX::ScratchImage mipImages2 = directxBase->LoadTexture(modelDataTerrain.material.textureFilePath);
-	//TextureManager::GetInstance()->LoadTexture(modelDataTerrain.material.textureFilePath);
-	//uint32_t textureIndexModel = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelDataTerrain.material.textureFilePath);
-	 //// 頂点リソースの作成
-	 //ComPtr<ID3D12Resource> vertexResourceTerrain = directxBase->CreateBufferResource(sizeof(VertexData) * modelDataTerrain.vertices.size());
-	 //// 頂点バッファビューを作成する
-	 //D3D12_VERTEX_BUFFER_VIEW vertexBufferViewTerrain{};
-	 //vertexBufferViewTerrain.BufferLocation = vertexResourceTerrain->GetGPUVirtualAddress();
-	 //vertexBufferViewTerrain.SizeInBytes = UINT(sizeof(VertexData) * modelDataTerrain.vertices.size()); // 使用するリソースのサイズは頂点サイズ
-	 //vertexBufferViewTerrain.StrideInBytes = sizeof(VertexData); // １頂点あたりのサイズ
-
-	 // 頂点リソースにデータを書き込む
-	 //VertexData* vertexDataTerrain = nullptr;
-	 //vertexResourceTerrain->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataTerrain)); // 書き込むためのアドレス
-	 //std::memcpy(vertexDataTerrain, modelDataTerrain.vertices.data(), sizeof(VertexData) * modelDataTerrain.vertices.size()); //頂点データをリソースにコピー
-
 	// RootSinature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -518,35 +351,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// マテリアル用のリソースを作る。 今回はcolor1つ分のサイズを用意する
 	ComPtr<ID3D12Resource> materialResource = directxBase->CreateBufferResource(sizeof(Material));
-	// Sprite用のマテリアルリソースを作る
-	//ComPtr<ID3D12Resource> materialResourceSprite = directxBase->CreateBufferResource(sizeof(Material));
 	// マテリアルにデータを書き込む
 	Material* materialData = nullptr;
-	//Material* materialDataSprite = nullptr;
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	// データを書き込む
-	//materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
 	// 今回は赤を書き込んでみる
 	materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	materialData->uvTransform = MakeIdentity4x4();
-	//materialDataSprite->uvTransform = MakeIdentity4x4();
 
 	materialData->enableLighting = true;
 	materialData->shininess = 70.0f;
 	materialData->specularColor = {1.0f, 1.0f, 1.0f};
-
-	//Lightingを有効にする
-	/*materialDataSprite->enableLighting = false;
-	materialDataSprite->shininess = 0.0f;
-	materialDataSprite->specularColor = {1.0f, 1.0f, 1.0f};*/
-	/*Transform uvTransformSprite{
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f},
-	};*/
-	
 
 	//シリアライズしてバイナリにする
 	ComPtr<ID3DBlob> signatureBlob = nullptr;
@@ -649,22 +465,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.1f, 100.0f);
 
-	//ComPtr<ID3D12Resource> indexResourceSprite = directxBase->CreateBufferResource(sizeof(uint32_t) * 6);
-
-	//D3D12_INDEX_BUFFER_VIEW indexbufferViewSprite{};
-	//// リソースの先頭のアドレスから使う
-	//indexbufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
-	//// 使用するリソースのサイズはインデックス6つ分のサイズ
-	//indexbufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
-	//// インデックスはuint32_tとする
-	//indexbufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
-
-	// インデックスリソースにデータを書き込む
-	//uint32_t* indexDataSprite = nullptr;
-	//indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
-	/*indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 3;
-	indexDataSprite[3] = 3;  indexDataSprite[4] = 1;  indexDataSprite[5] = 2;*/
-		
 	// カメラ用のリソースを作成 Phong Reflection Model
 	ComPtr<ID3D12Resource> cameraResource = directxBase->CreateBufferResource(sizeof(CameraForGPU));
 	// マテリアルにデータを書き込む
@@ -683,6 +483,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool isFlipY = sprite->GetIsFlipY();
 	Vector2 textureLeftTop = sprite->GetTextureLeftTop();
 	Vector2 textureSize = sprite->GetTextureSize();
+
+	Transform modelTransform = object3d->GetTransform();
+	Vector4 modelColor = object3d->GetColor();
+	bool modelEnableLighting = object3d->GetEnableLighting();
 
 	//ゲームループ
 	/*MSG msg{};*/
@@ -705,53 +509,60 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::SetNextWindowSize(ImVec2(300, 400));
 			ImGui::Begin("colorConfig");
 
-			/*if (ImGui::TreeNode("ColorCode")){
-				ImGui::DragFloat3("RGB", &materialData->color.x, 0.01f);
-				ImGui::ColorEdit3("RGB", &materialData->color.x);
-				ImGui::ColorEdit3("RGBSprite", &color.x);
-				ImGui::SliderFloat("R", &materialData->color.x, 0.0f, 1.0f);
-				ImGui::SliderFloat("G", &materialData->color.y, 0.0f, 1.0f);
-				ImGui::SliderFloat("B", &materialData->color.z, 0.0f, 1.0f);
+			if (ImGui::TreeNode("ColorCode")){
+				ImGui::DragFloat3("RGB", &modelColor.x, 0.01f);
+				ImGui::ColorEdit3("RGB", &modelColor.x);
+				//ImGui::ColorEdit3("RGBSprite", &color.x);
+				ImGui::SliderFloat("R", &modelColor.x, 0.0f, 1.0f);
+				ImGui::SliderFloat("G", &modelColor.y, 0.0f, 1.0f);
+				ImGui::SliderFloat("B", &modelColor.z, 0.0f, 1.0f);
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode("colorPreset")){
 				if (ImGui::Button("RED")) {
-					materialData->color.x = 1.0f;
-					materialData->color.y = 0.0f;
-					materialData->color.z = 0.0f;
+					modelColor.x = 1.0f;
+					modelColor.y = 0.0f;
+					modelColor.z = 0.0f;
 				}
 				if (ImGui::Button("GREEN")) {
-					materialData->color.x = 0.0f;
-					materialData->color.y = 1.0f;
-					materialData->color.z = 0.0f;
+					modelColor.x = 0.0f;
+					modelColor.y = 1.0f;
+					modelColor.z = 0.0f;
 				}
 				if (ImGui::Button("BLUE")) {
-					materialData->color.x = 0.0f;
-					materialData->color.y = 0.0f;
-					materialData->color.z = 1.0f;
+					modelColor.x = 0.0f;
+					modelColor.y = 0.0f;
+					modelColor.z = 1.0f;
 				}
 				if (ImGui::Button("YELLOW")) {
-					materialData->color.x = 1.0f;
-					materialData->color.y = 1.0f;
-					materialData->color.z = 0.0f;
+					modelColor.x = 1.0f;
+					modelColor.y = 1.0f;
+					modelColor.z = 0.0f;
 				}
 				if (ImGui::Button("WHITE")) {
-					materialData->color.x = 1.0f;
-					materialData->color.y = 1.0f;
-					materialData->color.z = 1.0f;
+					modelColor.x = 1.0f;
+					modelColor.y = 1.0f;
+					modelColor.z = 1.0f;
 				}
 				if (ImGui::Button("BLACK")) {
-					materialData->color.x = 0.0f;
-					materialData->color.y = 0.0f;
-					materialData->color.z = 0.0f;
+					modelColor.x = 0.0f;
+					modelColor.y = 0.0f;
+					modelColor.z = 0.0f;
 				}
 				ImGui::TreePop();
-			}*/
+			}
 			if (ImGui::TreeNode("STR"))
 			{
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
 				ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 				ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode("ModelSTR")) {
+				ImGui::DragFloat3("Scale", &modelTransform.scale.x, 0.01f);
+				ImGui::DragFloat3("Rotate", &modelTransform.rotate.x, 0.01f);
+				ImGui::DragFloat3("Translate", &modelTransform.translate.x, 0.01f);
+				ImGui::Checkbox("EnableLighting", &modelEnableLighting);
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode("SpriteSTR"))
@@ -834,24 +645,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3d->SetDirectionalLight(directionalLightData);
 			object3d->SetPointLight(pointLightData);
 			object3d->SetSpotLight(spotLightData);
+
+			object3d->SetTransform(modelTransform);
+			object3d->SetColor(modelColor);
+			object3d->SetEnableLighting(modelEnableLighting);
 			object3d->Update(cameraTransform);
 
 			directxBase->PreDraw();
-
-			//Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
-			//uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
-			//uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
-			//materialDataSprite->uvTransform = uvTransformMatrix;
-
-			////ゲームの処理
-			//// Sprite用のWorldViewProjectionMatrixを作る
-			//// SpriteのTransform処理
-			//Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-			//Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
-			//Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
-			//Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-			//tranformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
-
 			
 			//// 3DのTransform処理
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
@@ -862,15 +662,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpData->WVP = worldViewProjectionMatrix;
 			wvpData->World = worldMatrix;
 
-
-
-			
-			// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-			//directxBase->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-			// PSOを設定
-			//directxBase->GetCommandList()->SetPipelineState(graphicsPilelineState.Get()); 
-			// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-			//directxBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			spriteBase->ShaderDraw();
 
 			directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere); // VBVを設定
@@ -892,25 +683,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 			directxBase->GetCommandList()->DrawInstanced(kVertexCount, 1, 0, 0);
 
-			// 描画！(DrawCall/ドローコール) 6個のインデックスを使用し一つのインスタンスを描画。その他は当面0で良い
-
-			//// ModelTerrain
-			//directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewTerrain); // VBVを設定
-			//directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndexModel));
-			//directxBase->GetCommandList()->DrawInstanced(UINT(modelDataTerrain.vertices.size()), 1, 0, 0);
-
-			////Spriteの描画。変更が必要なものだけ変更する
-			//directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
-
-			//directxBase->GetCommandList()->IASetIndexBuffer(&indexbufferViewSprite); // IBVを設定
-
-			//// マテリアルCBufferの場所を設定
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-			//// TransformationMatrixCBbufferの場所を設定
-			//directxBase->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			//directxBase->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//// 描画
-			//directxBase->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 			sprite->Draw();
 
 			object3dBase->ShaderDraw();

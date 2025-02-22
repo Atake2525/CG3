@@ -3,14 +3,14 @@
 #include "DirectXBase.h"
 #include "TextureManager.h"
 
-//void Sprite::SetTransform(Transform transform){ 
-//	position.x = transform.translate.x;
-//	position.y = transform.translate.y;
-//	rotation = transform.rotate.z;
-//	scale.x = transform.rotate.x;
-//	scale.y = transform.rotate.y;
-//}
-//
+void Sprite::SetTransform(Transform& transform){ 
+	position.x = transform.translate.x;
+	position.y = transform.translate.y;
+	rotation = transform.rotate.z;
+	scale.x = transform.rotate.x;
+	scale.y = transform.rotate.y;
+}
+
 //void Sprite::SetMaterial(Material* material){ 
 //	materialData = material; 
 //}

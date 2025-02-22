@@ -167,7 +167,7 @@ public:
 	// Setter(TextureSize)
 	void SetTextureSize(const Vector2& size) { textureSize = size; }
 
-	//void SetTransform(Transform transform);
+	void SetTransform(Transform& transform);
 	//void SetMaterial(Material* material);
 	// 
 	// 初期化時などの一度に変更したい場合に
