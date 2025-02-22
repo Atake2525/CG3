@@ -33,6 +33,7 @@
 #include "Model.h"
 #include "ModelManager.h"
 #include "Transform.h"
+#include "Camera.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"
@@ -96,6 +97,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directxBase = new DirectXBase();
 	directxBase->Initialize(winApp);
 
+	Camera* camera = nullptr;
+	camera = new Camera();
+	camera->SetRotate({0.36f, 0.0f, 0.0f});
+	camera->SetTranslate({0.0f, 6.0f, -19.0f});
+
 	SpriteBase* spriteBase = nullptr;
 	spriteBase = new SpriteBase();
 	spriteBase->Initialize(directxBase);
@@ -103,6 +109,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Object3dBase* object3dBase = nullptr;
 	object3dBase = new Object3dBase();
 	object3dBase->Initialize(directxBase);
+	object3dBase->SetDefaultCamera(camera);
 
 	ModelBase* modelBase = nullptr;
 	modelBase = new ModelBase();
@@ -125,15 +132,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	uint32_t textureIndexUv = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/uvChecker.png");
 
 	ModelManager::GetInstance()->LoadModel("Resources", "terrain.obj");
-	ModelManager::GetInstance()->LoadModel("Resources", "axis.obj");
-	ModelManager::GetInstance()->LoadModel("Resources", "bunny.obj");
-	ModelManager::GetInstance()->LoadModel("Resources", "teapot.obj");
+	//ModelManager::GetInstance()->LoadModel("Resources", "axis.obj");
+	//ModelManager::GetInstance()->LoadModel("Resources", "bunny.obj");
+	//ModelManager::GetInstance()->LoadModel("Resources", "teapot.obj");
 
 	Object3d* object3d = nullptr;
 	object3d = new Object3d();
 	object3d->Initialize(object3dBase);
 
-	object3d->SetModel("teapot.obj");
+	object3d->SetModel("terrain.obj");
 
 	Input* input = nullptr;
 	input = new Input();
@@ -628,15 +635,59 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::End();
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
-
-			if (input->PushKey(DIK_0)) {
-				spotLightData->distance += 0.1f;
+#ifdef _DEBUG
+			const float speed = 0.7f;
+			Vector3 velocity(0.0f, 0.0f, speed);
+			velocity = TransformNormal(velocity, camera->GetWorldMatrix());
+			if (input->PushKey(DIK_W)) {
+				cameraTransform.translate += velocity;
 			}
-			
+			if (input->PushKey(DIK_S)) {
+				cameraTransform.translate -= velocity;
+			}
+			velocity = {speed, 0.0f, 0.0f};
+			velocity = TransformNormal(velocity, camera->GetWorldMatrix());
+			if (input->PushKey(DIK_A)) {
+				cameraTransform.translate -= velocity;
+			}
+			if (input->PushKey(DIK_D)) {
+				cameraTransform.translate += velocity;
+			}
+			if (input->PushKey(DIK_SPACE)) {
+				cameraTransform.translate.y += 1.0f;
+			}
+			if (input->PushKey(DIK_LSHIFT)) {
+				cameraTransform.translate.y -= 1.0f;
+			}
+			if (input->PushKey(DIK_LEFT)) {
+				cameraTransform.rotate.y -= 0.03f;
+			}
+			if (input->PushKey(DIK_RIGHT)) {
+				cameraTransform.rotate.y += 0.03f;
+			}
+			if (input->PushKey(DIK_UP)) {
+				cameraTransform.rotate.x -= 0.03f;
+			}
+			if (input->PushKey(DIK_DOWN)) {
+				cameraTransform.rotate.x += 0.03f;
+			}
+			if (input->PushKey(DIK_Q)) {
+				cameraTransform.rotate.z -= 0.01f;
+			}
+			if (input->PushKey(DIK_E)) {
+				cameraTransform.rotate.z += 0.01f;
+			}
+
+			cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
+#endif // _DEBUG
 
 
 			// ImGuiの内部コマンドを生成する
 			ImGui::Render();
+
+			camera->SetRotate(cameraTransform.rotate);
+			camera->SetTranslate(cameraTransform.translate);
+			camera->Update();
 
 			sprite->SetStatus(position, rotation, scale, color);
 			sprite->SetAnchorPoint(anchorPoint);
@@ -653,7 +704,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3d->SetRotateInDegree(modelTransform.rotate);
 			object3d->SetColor(modelColor);
 			object3d->SetEnableLighting(modelEnableLighting);
-			object3d->Update(cameraTransform);
+			object3d->Update();
 
 			directxBase->PreDraw();
 			
@@ -713,6 +764,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	directxBase->Finalize();
 	delete directxBase;
+
+	delete camera;
 
 	delete spriteBase;
 

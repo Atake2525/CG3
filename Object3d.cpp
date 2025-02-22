@@ -6,6 +6,7 @@
 #include "WinApp.h"
 #include "Model.h"
 #include "ModelManager.h"
+#include "Camera.h"
 #include <fstream>
 #include <sstream>
 #include <cassert>
@@ -65,25 +66,29 @@ void Object3d::Initialize(Object3dBase* object3dBase) {
         {0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f}
     };
-	cameraTransform = {
-	    {1.0f, 1.0f, 1.0f  },
-        {0.3f, 0.0f, 0.0f  },
-        {0.0f, 6.0f, -19.0f}
-    };
 
-	cameraData->worldPosition = cameraTransform.translate;
+	cameraData->worldPosition = {1.0f, 1.0f, 1.0f};
+
+	camera = object3dBase_->GetDefaultCamera();
 }
 
-void Object3d::Update(Transform& camera) {
+void Object3d::Update() {
 
-	cameraTransform = camera;
+	//cameraTransform = camerad;
 
 	// 3DのTransform処理
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+	//Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+	Matrix4x4 worldViewProjectionMatrix;
+	if (camera) {
+		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
+		worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+	} else {
+		worldViewProjectionMatrix = worldMatrix;
+	}
+	//Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+	//Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
+	//Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 	transformationMatrix->WVP = worldViewProjectionMatrix;
 	transformationMatrix->World = worldMatrix;
 }
@@ -174,5 +179,5 @@ const Vector3& Object3d::GetRotateInDegree() const {
 }
 
 void Object3d::SetRotateInDegree(const Vector3& rotate) { 
-	transform.rotate = SpwapRadian(rotate);
+	transform.rotate = SwapRadian(rotate);
 }

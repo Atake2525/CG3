@@ -14,8 +14,11 @@ const Vector3 operator*(const Vector3& v, const float f);
 
 Vector3& operator+=(Vector3& v1, const Vector3& v2);
 
+Vector3& operator-=(Vector3& v1, const Vector3& v2);
+
 Vector3 operator+(Vector3 v1, const Vector3& v2);
 
+Vector3 operator-(Vector3 v1, const Vector3& v2);
 
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4();
@@ -74,4 +77,11 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 Vector3 SwapDegree(Vector3 radian);
 
-Vector3 SpwapRadian(Vector3 degree);
+Vector3 SwapRadian(Vector3 degree);
+
+float SwapDegree(float radian);
+
+float SwapRadian(float degree);
+
+// ベクトル変換
+Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
