@@ -61,7 +61,7 @@ void Object3d::Initialize(Object3dBase* object3dBase) {
 	spotLightData->cosFalloffStart = max(spotLightData->cosFalloffStart, spotLightData->cosAngle);
 
 	transform = {
-	    {1.0f, -1.0f, 1.0f},
+	    {1.0f, 1.0f, 1.0f},
         {0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f}
     };
