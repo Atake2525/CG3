@@ -71,3 +71,7 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 // 球体描画
 //void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+
+Vector3 SwapDegree(Vector3 radian);
+
+Vector3 SpwapRadian(Vector3 degree);

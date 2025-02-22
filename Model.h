@@ -41,12 +41,22 @@ class Model {
 public:
 
 	// 初期化
-	void Initialize(ModelBase* modelBase, std::string directoryPath , std::string filename);
+	void Initialize(ModelBase* modelBase, std::string directoryPath, std::string filename, bool enableLighting);
 	
 	// 更新
 	void Draw();
 
 	void SetIA();
+
+	// Getter(Color)
+	const Vector4 GetColor() const { return materialData->color; }
+	// Getter(EnableLighting)
+	const bool GetEnableLighting() const { return materialData->enableLighting; }
+
+	// Setter(Color)
+	void SetColor(const Vector4& color) { materialData->color = color; }
+	// Setter(EnableLighting)
+	void SetEnableLighting(const bool& enableLighting) { materialData->enableLighting = enableLighting; }
 
 private:
 

@@ -329,3 +329,20 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 	return ans;
 };
 
+Vector3 SwapDegree(Vector3 radian) {
+	Vector3 result = {
+	    radian.x * (180.0f / float(M_PI)),
+	    radian.y * (180.0f / float(M_PI)),
+	    radian.z * (180.0f / float(M_PI)),
+	};
+	return result;
+}
+
+Vector3 SpwapRadian(Vector3 degree) {
+	Vector3 result = {
+	    degree.x * (float(M_PI) / 180.0f),
+	    degree.y * (float(M_PI) / 180.0f),
+	    degree.z * (float(M_PI) / 180.0f),
+	};
+	return result;
+}

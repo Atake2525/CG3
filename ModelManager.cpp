@@ -22,7 +22,7 @@ void ModelManager::Initialize(DirectXBase* directxBase) {
 	modelBase->Initialize(directxBase);
 }
 
-void ModelManager::LoadModel(const std::string& directoryPath, const std::string& filePath) {
+void ModelManager::LoadModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting) {
 	// 読み込み済モデルを検索
 	if (models.contains(filePath)) {
 		// 読み込み済なら早期return
@@ -31,7 +31,7 @@ void ModelManager::LoadModel(const std::string& directoryPath, const std::string
 
 	// モデルの生成と読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(modelBase, directoryPath, filePath);
+	model->Initialize(modelBase, directoryPath, filePath, enableLighting);
 
 	// モデルをmapコンテナに格納する
 	models.insert(std::make_pair(filePath, std::move(model)));
