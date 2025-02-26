@@ -181,3 +181,9 @@ const Vector3& Object3d::GetRotateInDegree() const {
 void Object3d::SetRotateInDegree(const Vector3& rotate) { 
 	transform.rotate = SwapRadian(rotate);
 }
+
+void Object3d::SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate) {
+	transform.translate = translate;
+	transform.scale = scale;
+	transform.rotate = rotate;
+}

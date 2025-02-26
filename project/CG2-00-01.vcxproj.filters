@@ -156,6 +156,9 @@
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp">
       <Filter>Engine\2d\Sprite\SpriteBase</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Audio\Audio.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externels\imgui\imconfig.h">
@@ -247,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h">
       <Filter>Engine\2d\Sprite\SpriteBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Audio\Audio.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
