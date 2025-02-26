@@ -22,6 +22,12 @@ void Sprite::SetStatus(const Vector2& position, const float& rotation, const Vec
 	materialData->color = color;
 }
 
+void Sprite::SetTransform(const Vector2& position, const float& rotation, const Vector2& scale) {
+	this->position = position;
+	this->rotation = rotation;
+	this->scale = scale;
+}
+
 
 void Sprite::Initialize(SpriteBase* spriteBase, std::string textureFilePath) { 
 	spriteBase_ = spriteBase;

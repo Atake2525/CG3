@@ -102,6 +102,8 @@ public:
 
 	// Setter(Transform)
 	void SetTransform(const Transform& transform) { this->transform = transform; }
+	// Setter(Transform, pos,scale,rotate)
+	void SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate);
 	// Setter(Translate)
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 	// Setter(Scale)
@@ -114,6 +116,7 @@ public:
 	void SetColor(const Vector4& color);
 	// Setter(EnableLighting)
 	void SetEnableLighting(const bool& enableLighting);
+	// Setter(specularColor
 
 
 private:

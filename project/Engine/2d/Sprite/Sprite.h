@@ -166,8 +166,10 @@ public:
 	void SetTextureLeftTop(const Vector2& LeftTop) { textureLeftTop = LeftTop; }
 	// Setter(TextureSize)
 	void SetTextureSize(const Vector2& size) { textureSize = size; }
-
+	// Setter(Transform)
 	void SetTransform(Transform& transform);
+	// Setter(Transform)
+	void SetTransform(const Vector2& position, const float& rotation, const Vector2& scale);
 	//void SetMaterial(Material* material);
 	// 
 	// 初期化時などの一度に変更したい場合に

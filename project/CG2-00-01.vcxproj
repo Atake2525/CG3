@@ -63,7 +63,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d\Sprite;$(ProjectDir)Engine\2d\SpriteBase;$(ProjectDir)Engine\3d\Camera;$(ProjectDir)Engine\3d\Model\Model;$(ProjectDir)Engine\3d\Model\ModelBase;$(ProjectDir)Engine\3d\Object\Object3d;$(ProjectDir)Engine\3d\Object\Object3dBase;$(ProjectDir)Engine\BlackBox\LeakChecker;$(ProjectDir)Engine\BlackBox\Log;$(ProjectDir)Engine\Core\BaseEngine;$(ProjectDir)Engine\Core\Input;$(ProjectDir)Engine\Core\WinApp;$(ProjectDir)Engine\LoadManager\ModelManager;$(ProjectDir)Engine\LoadManager\TextureManager;$(ProjectDir)Engine\Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d\Sprite;$(ProjectDir)Engine\2d\SpriteBase;$(ProjectDir)Engine\3d\Camera;$(ProjectDir)Engine\3d\Model\Model;$(ProjectDir)Engine\3d\Model\ModelBase;$(ProjectDir)Engine\3d\Object\Object3d;$(ProjectDir)Engine\3d\Object\Object3dBase;$(ProjectDir)Engine\BlackBox\LeakChecker;$(ProjectDir)Engine\Audio;$(ProjectDir)Engine\BlackBox\Log;$(ProjectDir)Engine\Core\BaseEngine;$(ProjectDir)Engine\Core\Input;$(ProjectDir)Engine\Core\WinApp;$(ProjectDir)Engine\LoadManager\ModelManager;$(ProjectDir)Engine\LoadManager\TextureManager;$(ProjectDir)Engine\Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -87,7 +87,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d\Sprite;$(ProjectDir)Engine\2d\SpriteBase;$(ProjectDir)Engine\3d\Camera;$(ProjectDir)Engine\3d\Model\Model;$(ProjectDir)Engine\3d\Model\ModelBase;$(ProjectDir)Engine\3d\Object\Object3d;$(ProjectDir)Engine\3d\Object\Object3dBase;$(ProjectDir)Engine\BlackBox\LeakChecker;$(ProjectDir)Engine\BlackBox\Log;$(ProjectDir)Engine\Core\BaseEngine;$(ProjectDir)Engine\Core\Input;$(ProjectDir)Engine\Core\WinApp;$(ProjectDir)Engine\LoadManager\ModelManager;$(ProjectDir)Engine\LoadManager\TextureManager;$(ProjectDir)Engine\Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d\Sprite;$(ProjectDir)Engine\2d\SpriteBase;$(ProjectDir)Engine\3d\Camera;$(ProjectDir)Engine\3d\Model\Model;$(ProjectDir)Engine\3d\Model\ModelBase;$(ProjectDir)Engine\3d\Object\Object3d;$(ProjectDir)Engine\3d\Object\Object3dBase;$(ProjectDir)Engine\BlackBox\LeakChecker;$(ProjectDir)Engine\Audio;$(ProjectDir)Engine\BlackBox\Log;$(ProjectDir)Engine\Core\BaseEngine;$(ProjectDir)Engine\Core\Input;$(ProjectDir)Engine\Core\WinApp;$(ProjectDir)Engine\LoadManager\ModelManager;$(ProjectDir)Engine\LoadManager\TextureManager;$(ProjectDir)Engine\Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,6 +102,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp" />
     <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
     <ClCompile Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.cpp" />
@@ -129,6 +130,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h" />
     <ClInclude Include="Engine\3d\Camera\Camera.h" />
     <ClInclude Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.h" />
