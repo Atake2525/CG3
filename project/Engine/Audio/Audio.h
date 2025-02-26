@@ -6,32 +6,46 @@
 
 #pragma comment(lib, "xaudio2.lib")
 
-// ‰¹ºƒf[ƒ^
+// éŸ³å£°ãƒ‡ãƒ¼ã‚¿
 struct SoundData {
-	// ”gŒ`ƒtƒH[ƒ}ƒbƒg
+	// æ³¢å½¢ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
 	WAVEFORMATEX wfex;
-	// ƒoƒbƒtƒ@‚Ìæ“ªƒAƒhƒŒƒX
+	// ãƒãƒƒãƒ•ã‚¡ã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹
 	BYTE* pBuffer;
-	// ƒoƒbƒtƒ@‚ÌƒTƒCƒY
+	// ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚º
 	unsigned int bufferSize;
 };
 
 class Audio {
+private:
+	// ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’é©ç”¨
+	static Audio* instance;
+
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã®éš è”½
+	Audio() = default;
+	~Audio() = default;
+	// ã‚³ãƒ”ãƒ¼ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ã‚³ãƒ”ãƒ¼ä»£å…¥æ¼”ç®—å­ã®å°å°
+	Audio(Audio&) = delete;
+	Audio& operator=(Audio&) = delete;
+
 public:
 
-	// ‰Šú‰»
+	// åˆæœŸåŒ–
 	void Initialize();
 
-	// I—¹ˆ—
+	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®å–å¾—
+	static Audio* GetInstance();
+
+	// çµ‚äº†å‡¦ç†
 	void Finalize();
-	
-	// ‰¹º“Ç‚İ‚İ
+
+	// éŸ³å£°èª­ã¿è¾¼ã¿
 	SoundData SoundLoadWave(const char* filename);
 
-	// ‰¹ºÄ¶
+	// éŸ³å£°å†ç”Ÿ
 	void SoundPlayWave(const SoundData& soundData);
 
-	// ‰¹ºƒf[ƒ^‰ğ•ú
+	// éŸ³å£°ãƒ‡ãƒ¼ã‚¿è§£æ”¾
 	void SoundUnload(SoundData* soundData);
 
 private:

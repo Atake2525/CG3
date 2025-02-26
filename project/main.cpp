@@ -276,11 +276,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//HRESULT hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	//hr = xAudio2->CreateMasteringVoice(&masterVoice);
 
-	Audio* audio = nullptr;
-	audio = new Audio();
-	audio->Initialize();
+	Audio::GetInstance()->Initialize();
 
-	SoundData soundData1 = audio->SoundLoadWave("Resources/Alarm01.wav");
+	SoundData soundData1 = Audio::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
 
 	Object3d* object3d = nullptr;
 	object3d = new Object3d();
@@ -829,7 +827,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			if (input->TriggerKey(DIK_0)) {
 				// 音声再生
-				audio->SoundPlayWave(soundData1);
+				Audio::GetInstance()->SoundPlayWave(soundData1);
 			}
 #endif // _DEBUG
 
@@ -931,10 +929,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	delete sprite;
 
-	/*xAudio2.Reset();*/
-	audio->Finalize();
-	audio->SoundUnload(&soundData1);
-	delete audio;
+	Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->Finalize();
 
 	delete object3d;
 
