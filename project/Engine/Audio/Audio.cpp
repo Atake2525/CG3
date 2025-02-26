@@ -19,13 +19,26 @@ struct FormatChunk {
 	WAVEFORMATEX fmt;  // 波形フォーマット
 };
 
-void Audio::Initialize() {
+Audio* Audio::instance = nullptr;
 
+
+Audio* Audio::GetInstance() {
+	if (instance == nullptr) {
+		instance = new Audio;
+	}
+	return instance;
+}
+
+void Audio::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
+
+void Audio::Initialize() {
+	xAudio2.Reset();
 	HRESULT hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
 }
-
-void Audio::Finalize() { xAudio2.Reset(); }
 
 SoundData Audio::SoundLoadWave(const char* filename) {
 	HRESULT result;
