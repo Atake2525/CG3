@@ -6,6 +6,20 @@
 using namespace Microsoft::WRL;
 using namespace Logger;
 
+SpriteBase* SpriteBase::instance = nullptr;
+
+SpriteBase* SpriteBase::GetInstance() {
+	if (instance == nullptr) {
+		instance = new SpriteBase;
+	}
+	return instance;
+}
+
+void SpriteBase::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
+
 void SpriteBase::Initialize(DirectXBase* directxBase) {
 	directxBase_ = directxBase;
 	CreateGraphicsPipeLineState();

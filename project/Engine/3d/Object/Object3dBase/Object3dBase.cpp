@@ -6,6 +6,20 @@
 using namespace Microsoft::WRL;
 using namespace Logger;
 
+Object3dBase* Object3dBase::instance = nullptr;
+
+Object3dBase* Object3dBase::GetInstance() {
+	if (instance == nullptr) {
+		instance = new Object3dBase;
+	}
+	return instance;
+}
+
+void Object3dBase::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
+
 void Object3dBase::Initialize(DirectXBase* directxBase) {
 	directxBase_ = directxBase;
 	CreateGraphicsPipeLineState();

@@ -4,8 +4,7 @@
 #include "kMath.h"
 #include "TextureManager.h"
 
-void Model::Initialize(ModelBase* modelBase, std::string directoryPath, std::string filename, bool enableLighting) {
-	modelBase_ = modelBase;
+void Model::Initialize(std::string directoryPath, std::string filename, bool enableLighting) {
 	// モデル読み込み
 	modelData = LoadObjFile(directoryPath, filename);
 
@@ -40,17 +39,17 @@ void Model::Initialize(ModelBase* modelBase, std::string directoryPath, std::str
 
 void Model::SetIA() {
 	// ModelTerrain
-	modelBase_->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+	ModelBase::GetInstance()->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 }
 
 void Model::Draw() {
 
 	// wvp用のCBufferの場所を設定
-	modelBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
-	modelBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));
+	ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));
 
-	modelBase_->GetDxBase()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+	ModelBase::GetInstance()->GetDxBase()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 }
 
 MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
@@ -156,7 +155,7 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 
 void Model::CreateVertexResource() {
 	// 頂点リソースの作成
-	vertexResource = modelBase_->GetDxBase()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
+	vertexResource = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
 }
 
 void Model::CreateVertexBufferView() {
@@ -166,4 +165,6 @@ void Model::CreateVertexBufferView() {
 	vertexBufferView.StrideInBytes = sizeof(VertexData);                                 // １頂点あたりのサイズ
 }
 
-void Model::CreateMaterialResouce() { materialResource = modelBase_->GetDxBase()->CreateBufferResource(sizeof(Material)); }
+void Model::CreateMaterialResouce() { 
+	materialResource = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(Material)); 
+}

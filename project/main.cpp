@@ -236,18 +236,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	camera->SetRotate({0.36f, 0.0f, 0.0f});
 	camera->SetTranslate({0.0f, 6.0f, -19.0f});
 
-	SpriteBase* spriteBase = nullptr;
-	spriteBase = new SpriteBase();
-	spriteBase->Initialize(directxBase);
+	SpriteBase::GetInstance()->Initialize(directxBase);
 
-	Object3dBase* object3dBase = nullptr;
-	object3dBase = new Object3dBase();
-	object3dBase->Initialize(directxBase);
-	object3dBase->SetDefaultCamera(camera);
+	Object3dBase::GetInstance()->Initialize(directxBase);
+	Object3dBase::GetInstance()->SetDefaultCamera(camera);
 
-	ModelBase* modelBase = nullptr;
-	modelBase = new ModelBase();
-	modelBase->Initialize(directxBase);
+	ModelBase::GetInstance()->Initialize(directxBase);
 
 	TextureManager::GetInstance()->Initialize(directxBase);
 
@@ -259,7 +253,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
 	Sprite* sprite = nullptr;
 	sprite = new Sprite();
-	sprite->Initialize(spriteBase, "Resources/uvChecker.png");
+	sprite->Initialize("Resources/uvChecker.png");
 	sprite->SetScale(Vector2{200.0f, 200.0f});
 
 	uint32_t textureIndexSphere = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/monsterBall.png");
@@ -282,7 +276,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Object3d* object3d = nullptr;
 	object3d = new Object3d();
-	object3d->Initialize(object3dBase);
+	object3d->Initialize();
 
 	object3d->SetModel("terrain.obj");
 
@@ -829,6 +823,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				// 音声再生
 				Audio::GetInstance()->SoundPlayWave(soundData1);
 			}
+			if (input->TriggerKey(DIK_ESCAPE)) {
+				break;
+			}
 #endif // _DEBUG
 
 
@@ -867,7 +864,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			wvpData->WVP = worldViewProjectionMatrix;
 			wvpData->World = worldMatrix;
 
-			spriteBase->ShaderDraw();
+			SpriteBase::GetInstance()->ShaderDraw();
 
 			directxBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere); // VBVを設定
 			// マテリアルCBufferの場所を設定
@@ -890,7 +887,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			sprite->Draw();
 
-			object3dBase->ShaderDraw();
+			Object3dBase::GetInstance()->ShaderDraw();
 
 			object3d->Draw(directionalLightResource, pointLightResource);
 
@@ -917,11 +914,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	delete camera;
 
-	delete spriteBase;
+	SpriteBase::GetInstance()->Finalize();
 
-	delete object3dBase;
+	Object3dBase::GetInstance()->Finalize();
 
-	delete modelBase;
+	ModelBase::GetInstance()->Finalize();
 
 	TextureManager::GetInstance()->Finalize();
 

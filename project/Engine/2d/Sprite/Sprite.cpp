@@ -29,8 +29,7 @@ void Sprite::SetTransform(const Vector2& position, const float& rotation, const 
 }
 
 
-void Sprite::Initialize(SpriteBase* spriteBase, std::string textureFilePath) { 
-	spriteBase_ = spriteBase;
+void Sprite::Initialize(std::string textureFilePath) { 
 
 	// VertexResourceの作成
 	CreateVertexResource();
@@ -144,33 +143,33 @@ void Sprite::ChangeTexture(std::string textureFilePath) {
 
 void Sprite::Draw() {
 	// Spriteの描画。変更が必要なものだけ変更する
-	spriteBase_->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
-	spriteBase_->GetDxBase()->GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
+	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
 
 	// マテリアルCBufferの場所を設定
-	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixCBbufferの場所を設定
-	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
-	spriteBase_->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
+	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
 	// 描画
-	spriteBase_->GetDxBase()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Sprite::CreateIndexResource() { 
-	indexResource = spriteBase_->GetDxBase()->CreateBufferResource(sizeof(uint32_t) * 6); 
+	indexResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(uint32_t) * 6);
 }
 
-void Sprite::CreateVertexResource() {
-	vertexResource = spriteBase_->GetDxBase()->CreateBufferResource(sizeof(VertexData) * 6);
+void Sprite::CreateVertexResource() { 
+	vertexResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexData) * 6); 
 }
 
 void Sprite::CreateMaterialResource() { 
-	materialResource = spriteBase_->GetDxBase()->CreateBufferResource(sizeof(Material));
+	materialResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(Material)); 
 }
 
 void Sprite::CreateTransformationMatrixResource() { 
-	transformationMatrixResource = spriteBase_->GetDxBase()->CreateBufferResource(sizeof(TransformationMatrix));
+	transformationMatrixResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(TransformationMatrix)); 
 }
 
 void Sprite::CreateIndexBufferView() {
