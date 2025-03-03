@@ -162,7 +162,7 @@
     <ClCompile Include="Application\DebugMode.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="FrameWork.cpp">
+    <ClCompile Include="Application\FrameWork.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -263,7 +263,7 @@
     <ClInclude Include="Application\DebugMode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="FrameWork.h">
+    <ClInclude Include="Application\FrameWork.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
