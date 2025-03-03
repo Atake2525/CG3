@@ -13,8 +13,7 @@
 
 using namespace Microsoft::WRL;
 
-void Object3d::Initialize(Object3dBase* object3dBase) { 
-	object3dBase_ = object3dBase;
+void Object3d::Initialize() { 
 
 	//// Resourceの作成
 	CreateTransformationMatrixResrouce();
@@ -69,7 +68,7 @@ void Object3d::Initialize(Object3dBase* object3dBase) {
 
 	cameraData->worldPosition = {1.0f, 1.0f, 1.0f};
 
-	camera = object3dBase_->GetDefaultCamera();
+	camera = Object3dBase::GetInstance()->GetDefaultCamera();
 }
 
 void Object3d::Update() {
@@ -99,16 +98,16 @@ void Object3d::Draw(Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResou
 		model_->SetIA();
 	}
 
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResourced->GetGPUVirtualAddress());
+	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(4, directionalLightResourced->GetGPUVirtualAddress());
 
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResourced->GetGPUVirtualAddress());
+	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResourced->GetGPUVirtualAddress());
 
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
+	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
 	// wvp用のCBufferの場所を設定
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
-	object3dBase_->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 
 	// 3Dモデルが割り当てられていれば描画する
 	if (model_) {
@@ -116,8 +115,8 @@ void Object3d::Draw(Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResou
 	}
 }
 
-void Object3d::CreateTransformationMatrixResrouce() {
-	transformationMatrixResource = object3dBase_->GetDxBase()->CreateBufferResource(sizeof(TransformationMatrix));
+void Object3d::CreateTransformationMatrixResrouce() { 
+	transformationMatrixResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(TransformationMatrix)); 
 }
 
 void Object3d::CreateLightResource() {
@@ -127,18 +126,19 @@ void Object3d::CreateLightResource() {
 }
 
 void Object3d::CreateDirectionalLightResource() { 
-	directionalLightResource = object3dBase_->GetDxBase()->CreateBufferResource(sizeof(DirectionalLight)); }
+	directionalLightResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(DirectionalLight)); 
+}
 
 void Object3d::CreatePointLightResource() { 
-	pointLightResource = object3dBase_->GetDxBase()->CreateBufferResource(sizeof(PointLight)); 
+	pointLightResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(PointLight));
 }
 
 void Object3d::CreateSpotLightResource() { 
-	spotLightResource = object3dBase_->GetDxBase()->CreateBufferResource(sizeof(SpotLight));
+	spotLightResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(SpotLight)); 
 }
 
 void Object3d::CreateCameraResource() { 
-	cameraResource = object3dBase_->GetDxBase()->CreateBufferResource(sizeof(CameraForGPU));
+	cameraResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(CameraForGPU));
 }
 
 void Object3d::SetDirectionalLight(DirectionalLight* lightData) {
@@ -186,4 +186,20 @@ void Object3d::SetTransform(const Vector3& translate, const Vector3& scale, cons
 	transform.translate = translate;
 	transform.scale = scale;
 	transform.rotate = rotate;
+}
+
+const Vector3& Object3d::GetSpecularColor() const { 
+	return model_->GetSpecularColor();
+}
+
+const float& Object3d::GetShininess() const { 
+	return model_->GetShininess();
+}
+
+void Object3d::SetSpecularColor(const Vector3& specularColor) {
+	model_->SetSpecularColor(specularColor); 
+}
+
+void Object3d::SetShininess(const float& shininess) { 
+	model_->SetShininess(shininess);
 }

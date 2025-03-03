@@ -7,7 +7,25 @@ class DirectXBase;
 class Camera;
 
 class Object3dBase {
+private:
+	// シングルトンパターンを適用
+	static Object3dBase* instance;
+
+	// コンストラクタ、デストラクタの隠蔽
+	Object3dBase() = default;
+	~Object3dBase() = default;
+
+	// コピーコンストラクタ、コピー代入演算子の封印
+	Object3dBase(Object3dBase&) = delete;
+	Object3dBase& operator=(Object3dBase&) = delete;
+
 public:
+	// インスタンスの取得
+	static Object3dBase* GetInstance();
+
+	// 終了処理
+	void Finalize();
+
 	/// <summary>
 	/// 初期化
 	/// </summary>

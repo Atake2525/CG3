@@ -102,6 +102,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\DebugMode.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp" />
     <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
@@ -117,7 +118,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\Input\Input.cpp" />
     <ClCompile Include="Engine\Math\kMath.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Application\main.cpp" />
     <ClCompile Include="Engine\3d\Model\Model\Model.cpp" />
     <ClCompile Include="Engine\3d\Model\ModelBase\ModelBase.cpp" />
     <ClCompile Include="Engine\LoadManager\ModelManager\ModelManager.cpp" />
@@ -128,8 +129,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\LoadManager\TextureManager\TextureManager.cpp" />
     <ClCompile Include="Engine\Math\Transform.cpp" />
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp" />
+    <ClCompile Include="Application\FrameWork.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\DebugMode.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h" />
     <ClInclude Include="Engine\3d\Camera\Camera.h" />
@@ -161,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\Vector4.h" />
     <ClInclude Include="Engine\Math\Matrix4x4.h" />
     <ClInclude Include="Engine\Core\WinApp\WinApp.h" />
+    <ClInclude Include="Application\FrameWork.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externels\imgui\LICENSE.txt" />

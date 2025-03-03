@@ -36,12 +36,11 @@ struct ModelData {
 	MaterialData material;
 };
 
-class ModelBase;
 class Model {
 public:
 
 	// 初期化
-	void Initialize(ModelBase* modelBase, std::string directoryPath, std::string filename, bool enableLighting);
+	void Initialize(std::string directoryPath, std::string filename, bool enableLighting);
 	
 	// 更新
 	void Draw();
@@ -49,18 +48,24 @@ public:
 	void SetIA();
 
 	// Getter(Color)
-	const Vector4 GetColor() const { return materialData->color; }
+	const Vector4& GetColor() const { return materialData->color; }
 	// Getter(EnableLighting)
-	const bool GetEnableLighting() const { return materialData->enableLighting; }
+	const bool& GetEnableLighting() const { return materialData->enableLighting; }
+	// Getter(SpecularColor)
+	const Vector3& GetSpecularColor() const { return materialData->specularColor; }
+	// Getter(Shininess)
+	const float& GetShininess() const { return materialData->shininess; }
 
 	// Setter(Color)
 	void SetColor(const Vector4& color) { materialData->color = color; }
 	// Setter(EnableLighting)
 	void SetEnableLighting(const bool& enableLighting) { materialData->enableLighting = enableLighting; }
+	// Setter(SpecularColor)
+	void SetSpecularColor(const Vector3& specularColor) { materialData->specularColor = specularColor; }
+	// Setter(Shininess)
+	void SetShininess(const float& shininess) { materialData->shininess = shininess; }
 
 private:
-
-	ModelBase* modelBase_;
 
 	// 頂点データのバッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;

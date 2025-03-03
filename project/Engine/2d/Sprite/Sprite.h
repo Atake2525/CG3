@@ -7,14 +7,12 @@
 
 #pragma once
 
-class SpriteBase;
-
 class Sprite {
 public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(SpriteBase* spriteBase, std::string textureFilePath);
+	void Initialize(std::string textureFilePath);
 
 	/// <summary>
 	/// 更新
@@ -75,7 +73,6 @@ private:
 	void AdjustTextureSize();
 
 private:
-	SpriteBase* spriteBase_ = nullptr;
 
 	// バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;

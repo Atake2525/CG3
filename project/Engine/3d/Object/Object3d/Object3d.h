@@ -10,14 +10,13 @@
 
 #pragma once
 
-class Object3dBase;
 class Model;
 class Camera;
 
 class Object3d {
 public: // メンバ関数
 	// 初期化
-	void Initialize(Object3dBase* object3dBase);
+	void Initialize();
 	
 	// 更新
 	void Update();
@@ -79,8 +78,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
 	CameraForGPU* cameraData = nullptr;
 
-	Object3dBase* object3dBase_;
-
 	Model* model_ = nullptr;
 
 public:
@@ -99,6 +96,10 @@ public:
 	const Vector4& GetColor() const;
 	// Getter(EnableLighting)
 	const bool& GetEnableLighting() const;
+	// Getter(specularColor)
+	const Vector3& GetSpecularColor() const;
+	// Getter(shininess)
+	const float& GetShininess() const;
 
 	// Setter(Transform)
 	void SetTransform(const Transform& transform) { this->transform = transform; }
@@ -116,7 +117,10 @@ public:
 	void SetColor(const Vector4& color);
 	// Setter(EnableLighting)
 	void SetEnableLighting(const bool& enableLighting);
-	// Setter(specularColor
+	// Setter(specularColor)
+	void SetSpecularColor(const Vector3& specularColor);
+	// Setter(shininess)
+	void SetShininess(const float& shininess);
 
 
 private:

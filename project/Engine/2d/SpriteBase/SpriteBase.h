@@ -6,11 +6,28 @@
 class DirectXBase;
 
 class SpriteBase {
+private:
+	// シングルトンパターンを適用
+	static SpriteBase* instance;
+
+	// コンストラクタ、デストラクタの隠蔽
+	SpriteBase() = default;
+	~SpriteBase() = default;
+	// コピーコンストラクタ、コピー代入演算子の封印
+	SpriteBase(SpriteBase&) = delete;
+	SpriteBase& operator=(SpriteBase&) = delete;
+
 public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
 	void Initialize(DirectXBase* directxBase);
+
+	// インスタンスの取得
+	static SpriteBase* GetInstance();
+
+	// 終了処理
+	void Finalize();
 
 	/// <summary>
 	/// 共通描画設定
