@@ -23,73 +23,74 @@
 //#include "algorithm"
 
 #include <Windows.h>
- #include <cstdint>
- #include <string>
- #include <format>
+#include <cstdint>
+#include <string>
+#include <format>
 
 // DirectXBase
- #include <d3d12.h>
- #include <dxgi1_6.h>
- #include <wrl.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <wrl.h>
 
 
- #include <dxgidebug.h>
- #include <dxcapi.h>
- #include <fstream>
- #include <sstream>
- #include "Vector4.h"
- #include "Matrix4x4.h"
- #include <cassert>
- #include "kMath.h"
+#include <dxgidebug.h>
+#include <dxcapi.h>
+#include <fstream>
+#include <sstream>
+#include "Vector4.h"
+#include "Matrix4x4.h"
+#include <cassert>
+#include "kMath.h"
 
 // クラス化した部分
- #include "Input.h"
- #include "WinApp.h"
- #include "Logger.h"
- #include "D3DResourceLeakChecker.h"
- #include "DirectXBase.h"
- #include "SpriteBase.h"
- #include "Sprite.h"
- #include "TextureManager.h"
- #include "Object3dBase.h"
- #include "Object3d.h"
- #include "ModelBase.h"
- #include "Model.h"
- #include "ModelManager.h"
- #include "Transform.h"
- #include "Camera.h"
- #include "Audio.h"
+#include "Input.h"
+#include "WinApp.h"
+#include "Logger.h"
+#include "D3DResourceLeakChecker.h"
+#include "DirectXBase.h"
+#include "SpriteBase.h"
+#include "Sprite.h"
+#include "TextureManager.h"
+#include "Object3dBase.h"
+#include "Object3d.h"
+#include "ModelBase.h"
+#include "Model.h"
+#include "ModelManager.h"
+#include "Transform.h"
+#include "Camera.h"
+#include "Audio.h"
+#include "FrameWork.h"
 
 
- #include "algorithm"
- #include "externels/imgui/imgui.h"
- #include "externels/imgui/imgui_impl_dx12.h"
- #include "externels/imgui/imgui_impl_win32.h"
- #include "externels/DirectXTex/DirectXTex.h"
- extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include "algorithm"
+#include "externels/imgui/imgui.h"
+#include "externels/imgui/imgui_impl_dx12.h"
+#include "externels/imgui/imgui_impl_win32.h"
+#include "externels/DirectXTex/DirectXTex.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
- #pragma comment(lib, "dxcompiler.lib")
- #pragma comment(lib, "d3d12.lib")
- #pragma comment(lib, "dxgi.lib")
- #pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dxcompiler.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #pragma once
-class DebugMode {
+class DebugMode : public FrameWork {
 public:
 	// 初期化
-	void Initialize();
+	void Initialize() override;
 
 	// 終了処理
-	void Finalize();
+	void Finalize() override;
 
 	// 更新
-	void Update();
+	void Update() override;
 
 	// 描画
-	void Draw();
+	void Draw() override;
 
 	// ループ終了
-	bool RoopOut();
+	bool RoopOut() override { return Finished; }
 
 private:
 	D3DResourceLeakChecker d3dResourceLeakChecker;

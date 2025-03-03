@@ -8,6 +8,8 @@ using namespace Microsoft::WRL;
 
 void DebugMode::Initialize() {
 
+	FrameWork::Initialize();
+
 #pragma region 基盤システムの初期化
 
 	winApp = new WinApp();
@@ -129,6 +131,9 @@ void DebugMode::Initialize() {
 }
 
 void DebugMode::Update() {
+
+	FrameWork::Update();
+
 	if (winApp->ProcessMessage()) {
 		Finished = true;
 	}
@@ -303,7 +308,7 @@ void DebugMode::Update() {
 		Audio::GetInstance()->SoundPlayWave(soundData1);
 	}
 	if (input->TriggerKey(DIK_ESCAPE)) {
-		Finished;
+		Finished = true;
 	}
 #endif // _DEBUG
 
@@ -379,11 +384,6 @@ void DebugMode::Finalize() {
 	delete object3d;
 
 	delete input;
-}
 
-bool DebugMode::RoopOut() {
-	if (Finished) {
-		return true;
-	}
-	return false;
+	FrameWork::Finalize();
 }
